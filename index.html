@@ -58,62 +58,22 @@
     color: var(--text-primary);
     font-size: 14px;
     line-height: 1.6;
-    display: flex;
-    justify-content: center;
-    align-items: stretch;
-    min-height: 100vh;
-    min-height: 100dvh;
+    width: 100vw;
+    height: 100dvh;
+    overflow: hidden;
     padding: 0;
     margin: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
   }
 
-  /* ===== 手机外壳 - 桌面端才显示 ===== */
   .phone-frame {
     width: 100%;
-    height: 100vh;
-    height: 100dvh;
+    height: 100%;
     background: var(--bg-gradient);
     overflow: hidden;
     position: relative;
-  }
-
-  @media (min-width: 769px) {
-    body {
-      background: #0F172A;
-      padding: 20px 0;
-      align-items: center;
-    }
-    .phone-frame {
-      width: 375px;
-      height: 720px;
-      background: var(--white);
-      border-radius: 44px;
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4), 0 0 0 2px #1e293b;
-    }
-  }
-
-  /* 状态栏 - 手机端隐藏 */
-  .status-bar {
-    display: none;
-  }
-
-  @media (min-width: 769px) {
-    .status-bar {
-      display: flex;
-      height: 44px;
-      background: var(--white);
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 24px;
-    font-size: 15px;
-    font-weight: 600;
-    position: relative;
-    z-index: 100;
-    flex-shrink: 0;
-  }
-
-  .status-bar .time { font-weight: 700; letter-spacing: 0.5px; }
-  .status-bar .icons { display: flex; gap: 6px; align-items: center; font-size: 13px; }
   }
 
   /* ===== App 容器 ===== */
@@ -122,12 +82,6 @@
     position: relative;
     overflow: hidden;
     background: var(--bg-gradient);
-  }
-
-  @media (min-width: 769px) {
-    .app-container {
-      height: calc(100% - 44px);
-    }
   }
 
   /* ===== 页面通用 ===== */
@@ -2187,14 +2141,6 @@
 <body>
 
 <div class="phone-frame">
-  <!-- 状态栏 -->
-  <div class="status-bar">
-    <span class="time" id="statusTime">9:41</span>
-    <span class="icons">
-      <span>📶</span>
-      <span>🔋</span>
-    </span>
-  </div>
 
   <div class="app-container">
     <!-- ========== Tab页1：模板管理页 ========== -->
@@ -2616,17 +2562,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// 同步手机时间
-function updateStatusTime() {
-  const now = new Date();
-  const h = now.getHours();
-  const m = now.getMinutes().toString().padStart(2, '0');
-  const el = document.getElementById('statusTime');
-  if (el) el.textContent = h + ':' + m;
-}
-updateStatusTime();
-setInterval(updateStatusTime, 60000);
-
 // ==================== 数据存储 ====================
 const defaultTemplates = [
   {
