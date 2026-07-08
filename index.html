@@ -48,33 +48,54 @@
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    background: #0F172A;
+    background: var(--white);
     color: var(--text-primary);
     font-size: 14px;
     line-height: 1.6;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: stretch;
     min-height: 100vh;
-    padding: 20px 0;
+    min-height: 100dvh;
+    padding: 0;
+    margin: 0;
   }
 
-  /* ===== 手机外壳 ===== */
+  /* ===== 手机外壳 - 桌面端才显示 ===== */
   .phone-frame {
-    width: 375px;
-    height: 720px;
-    background: var(--white);
-    border-radius: 44px;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4), 0 0 0 2px #1e293b;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    background: var(--bg-gradient);
     overflow: hidden;
     position: relative;
   }
 
-  /* 状态栏 */
+  @media (min-width: 769px) {
+    body {
+      background: #0F172A;
+      padding: 20px 0;
+      align-items: center;
+    }
+    .phone-frame {
+      width: 375px;
+      height: 720px;
+      background: var(--white);
+      border-radius: 44px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4), 0 0 0 2px #1e293b;
+    }
+  }
+
+  /* 状态栏 - 手机端隐藏 */
   .status-bar {
-    height: 44px;
-    background: var(--white);
-    display: flex;
+    display: none;
+  }
+
+  @media (min-width: 769px) {
+    .status-bar {
+      display: flex;
+      height: 44px;
+      background: var(--white);
     justify-content: space-between;
     align-items: center;
     padding: 0 24px;
@@ -90,10 +111,16 @@
 
   /* ===== App 容器 ===== */
   .app-container {
-    height: calc(100% - 44px);
+    height: 100%;
     position: relative;
     overflow: hidden;
     background: var(--bg-gradient);
+  }
+
+  @media (min-width: 769px) {
+    .app-container {
+      height: calc(100% - 44px);
+    }
   }
 
   /* ===== 页面通用 ===== */
@@ -2145,34 +2172,8 @@
     transform: translate(-50%, -50%) scale(1);
   }
 
-  /* ===== 手机端适配 ===== */
-  @media (max-width: 768px) {
-    body {
-      background: var(--white);
-      padding: 0;
-      margin: 0;
-      min-height: 100vh;
-      min-height: 100dvh;
-    }
-    .phone-frame {
-      width: 100%;
-      height: 100vh;
-      height: 100dvh;
-      border-radius: 0;
-      box-shadow: none;
-      overflow-y: auto;
-    }
-    .status-bar {
-      display: none;
-    }
-    .app-container {
-      height: 100vh;
-      height: 100dvh;
-    }
-    .bottom-bar {
-      padding-bottom: env(safe-area-inset-bottom, 12px);
-    }
-  }
+  /* 桌面端打印样式 */
+  @media print { body { padding: 20px; } }
 
 </style>
 </head>
