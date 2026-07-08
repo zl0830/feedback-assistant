@@ -114,6 +114,7 @@
 
   .status-bar .time { font-weight: 700; letter-spacing: 0.5px; }
   .status-bar .icons { display: flex; gap: 6px; align-items: center; font-size: 13px; }
+  }
 
   /* ===== App 容器 ===== */
   .app-container {
@@ -2188,7 +2189,7 @@
 <div class="phone-frame">
   <!-- 状态栏 -->
   <div class="status-bar">
-    <span class="time">9:41</span>
+    <span class="time" id="statusTime">9:41</span>
     <span class="icons">
       <span>📶</span>
       <span>🔋</span>
@@ -2615,6 +2616,17 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// 同步手机时间
+function updateStatusTime() {
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes().toString().padStart(2, '0');
+  const el = document.getElementById('statusTime');
+  if (el) el.textContent = h + ':' + m;
+}
+updateStatusTime();
+setInterval(updateStatusTime, 60000);
+
 // ==================== 数据存储 ====================
 const defaultTemplates = [
   {
