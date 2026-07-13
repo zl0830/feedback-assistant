@@ -2441,7 +2441,7 @@
           </div>
         </div>
         <div class="form-group" id="repeatEndGroup" style="display:none;">
-          <label class="form-label">📅 重复截止日期</label>
+          <label class="form-label">📅 重复截止日期（选填）</label>
           <input type="date" class="form-input" id="newRepeatEnd">
         </div>
         <button class="btn btn-primary btn-block" id="addCourseBtn" onclick="saveNewCourse()">确认添加</button>
@@ -3470,7 +3470,14 @@ function expandCourse(course) {
   const results = [];
   if (course.repeatDays && course.repeatDays.length > 0) {
     const start = new Date(course.date + 'T00:00:00');
-    const end = new Date(course.repeatEnd + 'T00:00:00');
+    let end;
+    if (course.repeatEnd) {
+      end = new Date(course.repeatEnd + 'T00:00:00');
+    } else {
+      // 无截止日期，默认展开到2年后
+      end = new Date(start);
+      end.setFullYear(end.getFullYear() + 2);
+    }
     const cursor = new Date(start);
     while (cursor <= end) {
       const dayOfWeek = cursor.getDay() || 7;
@@ -3853,12 +3860,8 @@ function saveNewCourse() {
       showToast('请至少选择一个重复星期');
       return;
     }
-    repeatEnd = document.getElementById('newRepeatEnd').value;
-    if (!repeatEnd) {
-      showToast('请选择重复截止日期');
-      return;
-    }
-    if (repeatEnd <= date) {
+    repeatEnd = document.getElementById('newRepeatEnd').value || null;
+    if (repeatEnd && repeatEnd <= date) {
       showToast('截止日期需晚于开始日期');
       return;
     }
