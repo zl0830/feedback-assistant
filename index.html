@@ -2181,6 +2181,18 @@
   /* 桌面端打印样式 */
   @media print { body { padding: 20px; } }
 
+  /* 桌面端居中适配 */
+  @media (min-width: 500px) {
+    .phone-frame {
+      max-width: 430px;
+      margin: 0 auto;
+      border-radius: 0;
+    }
+    body {
+      background: #e8e9f0;
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -2503,6 +2515,8 @@
       <div class="nav-bar">
         <div class="back-btn" onclick="goBack()">‹</div>
         <div class="title">反馈历史</div>
+        <div class="right-btn" onclick="importAllData()" style="font-size:12px;">导入</div>
+        <div class="right-btn" onclick="exportAllData()" style="font-size:12px;">导出</div>
         <div class="right-btn" id="historyBatchDeleteBtn" style="display:none;color:var(--danger);" onclick="batchDeleteHistory()">删除</div>
       </div>
       <div class="page-content">
@@ -2728,6 +2742,7 @@ let lastGeneratedContent = '';
 let lastGeneratedStudentName = '';
 let lastGeneratedCourseName = '';
 let feedbackHistory = []; // 反馈历史记录
+let editingCourseId = null; // 编辑模式下的课程ID
 
 // ==================== localStorage 持久化 ====================
 function saveData() {
@@ -3595,14 +3610,40 @@ function useScheduleCourse(courseId) {
 
 // 打开新增课程页面
 function openAddCourse() {
+  editingCourseId = null;
   navigateTo('page-add-course');
   // 设置默认日期为当前选中的日期
   setTimeout(() => {
     document.getElementById('newDate').value = currentDate;
+    document.getElementById('addCourseTitle').textContent = '添加课程';
+    document.getElementById('addCourseBtn').textContent = '确认添加';
   }, 50);
 }
 
-// 保存新课程
+function openEditCourse(courseId) {
+  const course = schedule.find(s => s.id === courseId);
+  if (!course) return;
+  const student = students.find(s => s.id === course.studentId);
+  if (!student) return;
+  
+  editingCourseId = courseId;
+  closeCourseMenu();
+  navigateTo('page-add-course');
+  
+  setTimeout(() => {
+    document.getElementById('newStudentName').value = student.name;
+    document.getElementById('newSubject').value = student.subject;
+    document.getElementById('newGrade').value = student.grade;
+    document.getElementById('newDate').value = course.date;
+    document.getElementById('newStartTime').value = course.startTime;
+    document.getElementById('newEndTime').value = course.endTime;
+    document.getElementById('newHourlyRate').value = course.hourlyRate || 200;
+    document.getElementById('addCourseTitle').textContent = '编辑课程';
+    document.getElementById('addCourseBtn').textContent = '保存修改';
+  }, 50);
+}
+
+// 保存新课程 / 编辑课程
 function saveNewCourse() {
   const name = document.getElementById('newStudentName').value.trim();
   const subject = document.getElementById('newSubject').value;
@@ -3638,24 +3679,39 @@ function saveNewCourse() {
     students.push(student);
   }
 
-  // 添加课程
-  const newCourseId = schedule.length > 0 ? Math.max(...schedule.map(s => s.id)) + 1 : 1;
-  schedule.push({
-    id: newCourseId,
-    date,
-    startTime,
-    endTime,
-    studentId: student.id,
-    courseName,
-    feedbacked: false,
-    hourlyRate: parseInt(document.getElementById('newHourlyRate').value) || 200
-  });
+  if (editingCourseId !== null) {
+    // 编辑模式：更新现有课程
+    const course = schedule.find(s => s.id === editingCourseId);
+    if (course) {
+      course.date = date;
+      course.startTime = startTime;
+      course.endTime = endTime;
+      course.studentId = student.id;
+      course.courseName = courseName;
+      course.hourlyRate = parseInt(document.getElementById('newHourlyRate').value) || 200;
+    }
+    editingCourseId = null;
+    showToast('课程修改成功');
+  } else {
+    // 新建模式：添加课程
+    const newCourseId = schedule.length > 0 ? Math.max(...schedule.map(s => s.id)) + 1 : 1;
+    schedule.push({
+      id: newCourseId,
+      date,
+      startTime,
+      endTime,
+      studentId: student.id,
+      courseName,
+      feedbacked: false,
+      hourlyRate: parseInt(document.getElementById('newHourlyRate').value) || 200
+    });
+    showToast('课程添加成功');
+  }
 
   // 按日期和时间排序
   schedule.sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
 
   saveData();
-  showToast('课程添加成功');
   currentDate = date;
   currentMonth = new Date(date);
   renderCalendar();
@@ -3692,6 +3748,10 @@ function showCourseMenu(e, courseId) {
   overlay.innerHTML = `
     <div class="course-menu-sheet" onclick="event.stopPropagation()">
       <div class="course-menu-title">${student.name} · ${course.courseName}</div>
+      <div class="course-menu-item" onclick="openEditCourse(${courseId})">
+        <span class="menu-icon">✏️</span>
+        <span>编辑课程</span>
+      </div>
       <div class="course-menu-item danger" onclick="deleteCourseFromMenu(${courseId})">
         <span class="menu-icon">🗑</span>
         <span>删除课程</span>
@@ -4650,6 +4710,55 @@ function downloadLocal() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showToast('已下载到本地，用浏览器打开即可');
+}
+
+function exportAllData() {
+  const data = {
+    schedule: schedule,
+    students: students,
+    templates: templates,
+    feedbackHistory: feedbackHistory,
+    exportTime: new Date().toISOString()
+  };
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `反馈助手备份_${formatDate(new Date()).replace(/[:\s]/g, '_')}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('数据已导出');
+}
+
+function importAllData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function() {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.schedule) schedule = data.schedule;
+        if (data.students) students = data.students;
+        if (data.templates) templates = data.templates;
+        if (data.feedbackHistory) feedbackHistory = data.feedbackHistory;
+        saveData();
+        renderCalendar();
+        renderHistoryPage();
+        showToast('数据已恢复');
+      } catch (err) {
+        showToast('文件格式错误，请检查');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
 }
 
 function exportResult() {
