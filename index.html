@@ -2168,7 +2168,7 @@
     <!-- ========== Tab页2：课程表页 ========== -->
     <div class="page tab-page active" id="page-schedule">
       <div class="nav-bar">
-        <div class="placeholder"></div>
+        <div class="right-btn" onclick="downloadLocal()" style="font-size:13px;">⬇下载</div>
         <div class="title">课程安排</div>
         <div class="right-btn" onclick="openHistoryPage()">历史</div>
       </div>
@@ -4463,6 +4463,20 @@ function copyResult() {
 }
 
 // ==================== 导出与打印 ====================
+function downloadLocal() {
+  const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '课后反馈助手.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('已下载到本地，用浏览器打开即可');
+}
+
 function exportResult() {
   const text = lastGeneratedContent;
   if (!text) {
