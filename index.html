@@ -1392,6 +1392,23 @@
   .cal-cell.selected.has-courses::after {
     background: var(--primary);
   }
+  /* 全部已反馈：绿色 */
+  .cal-cell.all-feedbacked::after {
+    background: var(--success) !important;
+  }
+  .cal-cell.today.all-feedbacked::after {
+    background: #a7f3d0 !important;
+  }
+  /* 有未反馈：橙色 */
+  .cal-cell.has-unfeedbacked::after {
+    background: #f59e0b !important;
+    width: 6px;
+    height: 6px;
+    bottom: 3px;
+  }
+  .cal-cell.today.has-unfeedbacked::after {
+    background: #fde68a !important;
+  }
   .cal-cell .cal-amount {
     font-size: 9px;
     color: var(--success);
@@ -3614,12 +3631,19 @@ function createCalCell(dayNum, dateStr, isOtherMonth, courseMap) {
   if (courses && courses.length > 0) {
     cell.classList.add('has-courses');
     let dayTotal = 0;
+    let allFeedbacked = true;
     courses.forEach(c => {
       const [sh, sm] = c.startTime.split(':').map(Number);
       const [eh, em] = c.endTime.split(':').map(Number);
       const mins = (eh * 60 + em) - (sh * 60 + sm);
       dayTotal += (mins / 60) * (c.hourlyRate || 200);
+      if (!feedbackedDates[c.id + '_' + c.date]) allFeedbacked = false;
     });
+    if (allFeedbacked) {
+      cell.classList.add('all-feedbacked');
+    } else {
+      cell.classList.add('has-unfeedbacked');
+    }
     const countStr = courses.length > 1 ? `${courses.length}节 ` : '';
     cell.innerHTML = `${dayNum}<span class="cal-amount">${countStr}¥${Math.round(dayTotal)}</span>`;
   } else {
