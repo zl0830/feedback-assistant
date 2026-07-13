@@ -53,6 +53,8 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
   }
 
   body {
@@ -64,17 +66,17 @@
     width: 100%;
     height: 100vh;
     height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
     overflow: hidden;
     padding: 0;
     margin: 0;
-    position: fixed;
-    top: 0;
-    left: 0;
   }
 
   .phone-frame {
     width: 100%;
-    height: 100%;
+    height: 100vh;
+    height: 100dvh;
     background: var(--bg-gradient);
     overflow: hidden;
     position: relative;
