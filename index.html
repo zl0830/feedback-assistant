@@ -250,6 +250,107 @@
     color: var(--text-secondary);
   }
 
+  .import-tpl-btn {
+    padding: 8px 16px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .import-tpl-btn:active {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  /* 导入模板弹窗 */
+  .import-tpl-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    animation: fadeIn 0.2s;
+  }
+  .import-tpl-panel {
+    background: var(--white);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 500px;
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: slideUp 0.25s ease;
+  }
+  .import-tpl-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--white);
+    z-index: 1;
+  }
+  .import-tpl-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .import-tpl-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+  .import-tpl-body {
+    padding: 16px 20px;
+  }
+  .import-tpl-textarea {
+    min-height: 180px;
+    font-size: 13px;
+    line-height: 1.6;
+    font-family: inherit;
+    resize: vertical;
+  }
+  .import-tpl-footer {
+    padding: 12px 20px 20px;
+    display: flex;
+    gap: 10px;
+    border-top: 1px solid var(--border);
+    position: sticky;
+    bottom: 0;
+    background: var(--white);
+  }
+  .import-tpl-footer .btn {
+    flex: 1;
+  }
+  .detected-vars {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .detected-var-tag {
+    padding: 4px 10px;
+    background: #eff6ff;
+    color: #2563eb;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
   .template-list {
     display: flex;
     flex-direction: column;
@@ -2307,13 +2408,57 @@
       </div>
       <div class="page-content">
         <div class="page-header">
-          <h1>我的模板</h1>
-          <p>选择模板快速生成课后反馈</p>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <h1>我的模板</h1>
+              <p>选择模板快速生成课后反馈</p>
+            </div>
+            <div class="import-tpl-btn" onclick="openImportTemplate()">📥 导入</div>
+          </div>
         </div>
         <div class="template-list" id="templateList"></div>
         <div class="bottom-safe"></div>
       </div>
       <button class="fab" id="addTemplateBtn">+</button>
+    </div>
+
+    <!-- 导入模板弹窗 -->
+    <div class="import-tpl-overlay" id="importTplOverlay" style="display:none;" onclick="closeImportTemplate()">
+      <div class="import-tpl-panel" onclick="event.stopPropagation()">
+        <div class="import-tpl-header">
+          <div class="import-tpl-title">📥 导入模板</div>
+          <div class="import-tpl-close" onclick="closeImportTemplate()">✕</div>
+        </div>
+        <div class="import-tpl-body">
+          <div class="form-group">
+            <label class="form-label">📝 模板名称</label>
+            <input type="text" class="form-input" id="importTplName" placeholder="例如：语文课后反馈">
+          </div>
+          <div class="form-group">
+            <label class="form-label">📚 科目</label>
+            <select class="form-input" id="importTplSubject">
+              <option value="数学">数学</option>
+              <option value="英语">英语</option>
+              <option value="语文">语文</option>
+              <option value="物理">物理</option>
+              <option value="化学">化学</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">📄 粘贴模板内容</label>
+            <textarea class="form-input import-tpl-textarea" id="importTplContent" placeholder="粘贴你的模板内容，使用 {{变量名}} 标记变量部分&#10;&#10;例如：&#10;{{学生姓名}}家长您好，&#10;我是{{老师姓名}}，{{日期}}的{{科目}}课已结束。&#10;&#10;【授课内容】&#10;{{授课内容}}&#10;&#10;【学生表现】&#10;{{学生表现}}&#10;&#10;【作业布置】&#10;{{作业布置}}&#10;&#10;如有疑问请联系我。"></textarea>
+          </div>
+          <div class="form-group" id="detectedVarsGroup" style="display:none;">
+            <label class="form-label">🔍 检测到的变量</label>
+            <div class="detected-vars" id="detectedVars"></div>
+          </div>
+        </div>
+        <div class="import-tpl-footer">
+          <button class="btn btn-secondary" onclick="closeImportTemplate()">取消</button>
+          <button class="btn btn-primary" onclick="doImportTemplate()">确认导入</button>
+        </div>
+      </div>
     </div>
 
     <!-- ========== Tab页2：课程表页 ========== -->
@@ -3010,6 +3155,141 @@ function getSubjectClass(subject) {
 }
 
 // ==================== 页面1：模板列表 ====================
+
+// 导入模板
+function openImportTemplate() {
+  document.getElementById('importTplOverlay').style.display = 'flex';
+  document.getElementById('importTplName').value = '';
+  document.getElementById('importTplContent').value = '';
+  document.getElementById('detectedVarsGroup').style.display = 'none';
+  document.getElementById('detectedVars').innerHTML = '';
+  
+  // 实时检测变量
+  const textarea = document.getElementById('importTplContent');
+  textarea.oninput = function() {
+    const vars = detectTemplateVars(this.value);
+    const varsGroup = document.getElementById('detectedVarsGroup');
+    const varsDiv = document.getElementById('detectedVars');
+    if (vars.length > 0) {
+      varsGroup.style.display = 'block';
+      varsDiv.innerHTML = vars.map(v => `<span class="detected-var-tag">{{${v}}}</span>`).join('');
+    } else {
+      varsGroup.style.display = 'none';
+    }
+  };
+}
+
+function closeImportTemplate() {
+  document.getElementById('importTplOverlay').style.display = 'none';
+}
+
+function detectTemplateVars(text) {
+  const matches = text.match(/\{\{(.+?)\}\}/g);
+  if (!matches) return [];
+  const vars = matches.map(m => m.replace(/^\{\{|\}\}$/g, '').trim());
+  return [...new Set(vars)]; // 去重
+}
+
+function doImportTemplate() {
+  const name = document.getElementById('importTplName').value.trim();
+  const subject = document.getElementById('importTplSubject').value;
+  const content = document.getElementById('importTplContent').value.trim();
+  
+  if (!name) {
+    showToast('请输入模板名称');
+    return;
+  }
+  if (!content) {
+    showToast('请粘贴模板内容');
+    return;
+  }
+  
+  const varNames = detectTemplateVars(content);
+  if (varNames.length === 0) {
+    showToast('未检测到变量，请使用 {{变量名}} 语法标记变量');
+    return;
+  }
+  
+  // 解析内容：提取 header（第一个变量之前）、modules（【标题】+内容）、footer（最后一段）
+  const lines = content.split('\n');
+  const modules = [];
+  let headerLines = [];
+  let footerLines = [];
+  let currentModule = null;
+  let inHeader = true;
+  let inFooter = false;
+  
+  // 检测是否有【】标记的模块
+  const hasModules = /【.+?】/.test(content);
+  
+  if (hasModules) {
+    for (const line of lines) {
+      const moduleMatch = line.match(/^(【.+?】)\s*(.*)/);
+      if (moduleMatch) {
+        inHeader = false;
+        if (currentModule) {
+          modules.push(currentModule);
+        }
+        currentModule = {
+          title: moduleMatch[1],
+          content: moduleMatch[2] || ''
+        };
+      } else if (currentModule) {
+        if (currentModule.content) {
+          currentModule.content += '\n' + line;
+        } else {
+          currentModule.content = line;
+        }
+      } else if (inHeader && line.trim()) {
+        headerLines.push(line);
+      }
+    }
+    if (currentModule) {
+      modules.push(currentModule);
+    }
+  } else {
+    // 无模块标记，全文作为一个模块
+    modules.push({ title: '【反馈内容】', content: content });
+    headerLines = [];
+  }
+  
+  const header = headerLines.join('\n');
+  const footer = '';
+  
+  // 构建 variables 对象
+  const variables = {};
+  varNames.forEach(v => {
+    // 判断变量类型：系统变量（学生姓名、老师姓名、科目、日期、上课时间）为 fixed
+    const fixedVars = ['学生姓名', '老师姓名', '科目', '日期', '上课时间'];
+    variables[v] = fixedVars.includes(v) ? 'fixed' : 'ai';
+  });
+  
+  // 构建 fixedValues
+  const fixedValues = {};
+  varNames.forEach(v => {
+    if (variables[v] === 'fixed') fixedValues[v] = '';
+  });
+  
+  const newId = templates.length > 0 ? Math.max(...templates.map(t => t.id)) + 1 : 1;
+  const newTemplate = {
+    id: newId,
+    name: name,
+    subject: subject,
+    header: header,
+    modules: modules,
+    footer: footer,
+    variables: variables,
+    fixedValues: fixedValues,
+    lastUsed: new Date().toISOString().replace('T', ' ').substring(0, 16)
+  };
+  
+  templates.push(newTemplate);
+  saveData();
+  renderTemplateList();
+  closeImportTemplate();
+  showToast('模板导入成功');
+}
+
 function renderTemplateList() {
   const list = document.getElementById('templateList');
   list.innerHTML = '';
