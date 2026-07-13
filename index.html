@@ -3245,7 +3245,7 @@ function smartDetectTemplate() {
   
   let result = text;
   
-  // 1. 检测学生姓名（从已有学生列表匹配 + "XXX同学" 模式）
+  // 1. 检测学生姓名（从已有学生列表匹配）
   if (students.length > 0) {
     const sortedStudents = [...students].sort((a, b) => b.name.length - a.name.length);
     for (const s of sortedStudents) {
@@ -3258,51 +3258,47 @@ function smartDetectTemplate() {
   // 也检测 "XXX同学" 模式
   result = result.replace(/([\u4e00-\u9fa5]{2,4})同学/g, '{{学生姓名}}同学');
   
-  // 2. 检测老师姓名 "X老师"
-  result = result.replace(/[\u4e00-\u9fa5]{1,3}老师/g, '{{老师姓名}}');
+  // 2. 检测科目（先于老师检测，避免被替换干扰）
+  const subjects = ['数学', '英语', '语文', '物理', '化学', '生物', '历史', '地理', '政治'];
+  for (const subj of subjects) {
+    // 匹配 "物理课"、"物理试卷"、"物理老师"、"物理小赵"、"物理学习" 等
+    const pattern = new RegExp(subj + '(?=课|试|练|知|内|老|小|学|新|的|$|\\n|[，。！？\\s\\[\\]【】])', 'g');
+    result = result.replace(pattern, '{{科目}}');
+  }
   
-  // 3. 检测日期
+  // 3. 检测老师姓名（支持 小赵老师、赵老师 等格式）
+  result = result.replace(/[\u4e00-\u9fa5]{1,4}老师/g, '{{老师姓名}}');
+  // 也检测 "我是XXX" 后面跟非老师的名字
+  result = result.replace(/我是[\u4e00-\u9fa5]{2,4}(?=[，,\s\n{\[【])/g, '我是{{老师姓名}}');
+  
+  // 4. 检测日期
   result = result.replace(/\d{4}年\d{1,2}月\d{1,2}日/g, '{{日期}}');
   result = result.replace(/\d{4}-\d{1,2}-\d{1,2}/g, '{{日期}}');
   result = result.replace(/\d{4}\/\d{1,2}\/\d{1,2}/g, '{{日期}}');
   
-  // 4. 检测时间段
+  // 5. 检测时间段
   result = result.replace(/\d{1,2}:\d{2}\s*[-~至到]\s*\d{1,2}:\d{2}/g, '{{上课时间}}');
   result = result.replace(/周[一二三四五六日]上?下?午?\d{1,2}:\d{2}[-~至到]\d{1,2}:\d{2}/g, '{{上课时间}}');
   result = result.replace(/周[一二三四五六日]\s*\d{1,2}:\d{2}\s*[-~至到]\s*\d{1,2}:\d{2}/g, '{{上课时间}}');
   
-  // 5. 检测科目
-  const subjects = ['数学', '英语', '语文', '物理', '化学', '生物', '历史', '地理', '政治'];
-  for (const subj of subjects) {
-    const pattern = new RegExp(subj + '(?=课)', 'g');
-    result = result.replace(pattern, '{{科目}}');
-  }
+  // 6. 检测并替换模块内容（通用匹配所有【xxx】标记的模块）
+  result = result.replace(/【(.+?)】\s*\n([\s\S]*?)(?=\n【|$)/g, function(match, title, content) {
+    const trimmed = content.trim();
+    // 如果内容已经是变量，不替换
+    if (!trimmed || trimmed.startsWith('{{')) return match;
+    
+    // 根据标题关键词判断变量名
+    let varName = '内容';
+    const t = title.replace(/本次|本课|本节|课堂/g, '');
+    if (/授课|教学|学习|讲解|课程|内容|知识|训练|精讲|知识点/.test(t)) varName = '授课内容';
+    else if (/表现|状态|态度|反馈|评价|专注|配合|课堂/.test(t)) varName = '学生表现';
+    else if (/作业|练习|习题|巩固|任务|完成|布置/.test(t)) varName = '作业布置';
+    else if (/后续|安排|下次|预习|准备|计划|上课/.test(t)) varName = '后续安排';
+    
+    return '【' + title + '】\n{{' + varName + '}}';
+  });
   
-  // 6. 检测并替换模块内容
-  // 对于【授课内容】、【学生表现】、【作业布置】、【后续安排】等模块，替换其内容为变量
-  const modulePatterns = [
-    { title: '授课内容', varName: '授课内容' },
-    { title: '学生表现', varName: '学生表现' },
-    { title: '作业布置', varName: '作业布置' },
-    { title: '后续安排', varName: '后续安排' },
-    { title: '课堂表现', varName: '学生表现' },
-    { title: '课后作业', varName: '作业布置' },
-    { title: '教学内容', varName: '授课内容' },
-    { title: '学习内容', varName: '授课内容' },
-  ];
-  
-  for (const mp of modulePatterns) {
-    const regex = new RegExp('(【' + mp.title + '】)\\s*\\n([\\s\\S]*?)(?=\\n【|$)', 'g');
-    result = result.replace(regex, function(match, title, content) {
-      const trimmed = content.trim();
-      if (trimmed && !trimmed.startsWith('{{')) {
-        return title + '\n{{' + mp.varName + '}}';
-      }
-      return match;
-    });
-  }
-  
-  // 7. 清理多余的周几描述（如果已经替换为上课时间）
+  // 7. 清理多余的周几描述
   result = result.replace(/周[一二三四五六日]\s*(?=\{\{上课时间\}\})/g, '');
   
   document.getElementById('importTplContent').value = result;
