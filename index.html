@@ -1184,66 +1184,142 @@
     border-radius: var(--radius-lg);
   }
 
-  /* ===== 课程表页面 ===== */
-  .day-tabs {
+  /* ===== 月导航 ===== */
+  .month-nav {
     display: flex;
-    gap: 4px;
-    margin-bottom: 16px;
-    padding: 2px;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+  .month-nav-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .month-nav-btn:active {
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+  .month-nav-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    min-width: 100px;
+    text-align: center;
   }
 
-  .day-tab {
-    flex: 1;
-    padding: 8px 2px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-secondary);
+  /* ===== 日历 ===== */
+  .calendar {
     background: var(--white);
-    border: 1.5px solid var(--border-strong);
-    cursor: pointer;
-    transition: all 0.2s;
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+  .cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+  .cal-cell {
+    aspect-ratio: 1;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
-    min-width: 0;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
     position: relative;
-  }
-
-  .day-tab .day-name {
-    font-size: 12px;
-  }
-
-  .day-tab .day-date {
-    font-size: 11px;
-    color: var(--text-muted);
+    font-size: 13px;
     font-weight: 500;
+    color: var(--text-primary);
   }
-
-  .day-tab.active {
-    background: var(--primary-gradient);
-    color: var(--white);
-    border-color: transparent;
-    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+  .cal-cell:active {
+    transform: scale(0.92);
   }
-
-  .day-tab.active .day-date {
-    color: rgba(255, 255, 255, 0.8);
+  .cal-cell.other-month {
+    color: var(--text-muted);
+    opacity: 0.4;
   }
-
-  .day-tab.today::after {
+  .cal-cell.today {
+    background: var(--primary);
+    color: #fff;
+    font-weight: 700;
+  }
+  .cal-cell.selected {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 700;
+  }
+  .cal-cell.today.selected {
+    background: var(--primary);
+    color: #fff;
+  }
+  .cal-cell.has-courses::after {
     content: '';
+    position: absolute;
+    bottom: 4px;
     width: 5px;
     height: 5px;
-    background: var(--primary);
     border-radius: 50%;
-    position: absolute;
-    margin-top: -4px;
+    background: var(--primary);
+  }
+  .cal-cell.today.has-courses::after {
+    background: #fff;
+  }
+  .cal-cell.selected.has-courses::after {
+    background: var(--primary);
+  }
+  .cal-cell .cal-amount {
+    font-size: 9px;
+    color: var(--success);
+    font-weight: 600;
+    margin-top: 1px;
+  }
+  .cal-cell.today .cal-amount {
+    color: #a7f3d0;
   }
 
-  .day-tab.active.today::after {
-    background: var(--white);
+  /* ===== 日详情 ===== */
+  .day-detail {
+    margin-bottom: 14px;
+  }
+  .day-detail-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px 10px;
+  }
+  .day-detail-date {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .day-detail-summary {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 600;
   }
 
   /* ===== 今日汇总卡片 ===== */
@@ -2113,19 +2189,30 @@
         <div class="right-btn" onclick="openHistoryPage()">历史</div>
       </div>
       <div class="page-content">
+        <div class="month-nav">
+          <div class="month-nav-btn" onclick="changeMonth(-1)">‹</div>
+          <div class="month-nav-title" id="monthTitle">2026年7月</div>
+          <div class="month-nav-btn" onclick="changeMonth(1)">›</div>
+        </div>
         <div class="summary-card" id="summaryCard">
           <div class="summary-left">
-            <div class="summary-label">今日工时</div>
+            <div class="summary-label">本月工时</div>
             <div class="summary-value" id="summaryHours">0h</div>
           </div>
           <div class="summary-divider"></div>
           <div class="summary-right">
-            <div class="summary-label">今日收入</div>
+            <div class="summary-label">本月收入</div>
             <div class="summary-value" id="summaryIncome">¥0</div>
           </div>
         </div>
-        <div class="day-tabs" id="dayTabs"></div>
-        <div id="scheduleList"></div>
+        <div class="calendar" id="calendar"></div>
+        <div class="day-detail" id="dayDetail" style="display:none;">
+          <div class="day-detail-header">
+            <span class="day-detail-date" id="dayDetailDate"></span>
+            <span class="day-detail-summary" id="dayDetailSummary"></span>
+          </div>
+          <div id="dayCourseList"></div>
+        </div>
         <div class="bottom-safe"></div>
       </div>
       <button class="fab" id="addScheduleBtn">+</button>
@@ -2218,19 +2305,12 @@
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">📅 上课时间</label>
+          <label class="form-label">📅 上课日期</label>
+          <input type="date" class="form-input" id="newDate">
+        </div>
+        <div class="form-group">
+          <label class="form-label">⏰ 上课时间</label>
           <div class="time-picker-row">
-            <div class="select-wrapper" style="flex:1;">
-              <select class="form-select" id="newDay">
-                <option value="1">周一</option>
-                <option value="2">周二</option>
-                <option value="3">周三</option>
-                <option value="4">周四</option>
-                <option value="5">周五</option>
-                <option value="6">周六</option>
-                <option value="7">周日</option>
-              </select>
-            </div>
             <input type="time" class="form-input" id="newStartTime" value="14:00" style="flex:1;">
             <span style="padding:0 6px;color:var(--text-secondary);">-</span>
             <input type="time" class="form-input" id="newEndTime" value="16:00" style="flex:1;">
@@ -2591,23 +2671,21 @@ let students = [
   { id: 3, name: '王大伟', subject: '数学', grade: '初三', courseName: '初三数学' }
 ];
 
-// 预设课程表数据（day: 1=周一 ... 7=周日，feedbacked: 是否已生成反馈）
-// 注意：同一 day + startTime + endTime 的课程视为班课（同一时段多学生）
+// 预设课程表数据（date: YYYY-MM-DD）
 let schedule = [
-  { id: 1, day: 1, startTime: '14:00', endTime: '15:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
-  { id: 2, day: 1, startTime: '16:00', endTime: '17:30', studentId: 2, courseName: '初二英语', feedbacked: false, hourlyRate: 200 },
-  { id: 3, day: 2, startTime: '15:00', endTime: '16:30', studentId: 3, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
-  { id: 4, day: 3, startTime: '14:00', endTime: '15:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
-  { id: 5, day: 3, startTime: '19:00', endTime: '20:30', studentId: 2, courseName: '初二英语', feedbacked: false, hourlyRate: 200 },
-  { id: 6, day: 4, startTime: '15:00', endTime: '16:30', studentId: 3, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
-  { id: 7, day: 5, startTime: '14:00', endTime: '15:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
-  { id: 8, day: 5, startTime: '16:00', endTime: '17:30', studentId: 2, courseName: '初二英语', feedbacked: false, hourlyRate: 200 },
-  { id: 9, day: 6, startTime: '09:00', endTime: '10:30', studentId: 3, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
-  { id: 10, day: 6, startTime: '14:00', endTime: '15:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
-  // 班课示例：同一时段多学生
-  { id: 11, day: 6, startTime: '09:00', endTime: '10:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
-  { id: 12, day: 7, startTime: '10:00', endTime: '11:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
-  { id: 13, day: 7, startTime: '10:00', endTime: '11:30', studentId: 3, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 1, date: '2026-07-13', startTime: '14:00', endTime: '15:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 2, date: '2026-07-13', startTime: '16:00', endTime: '17:30', studentId: 2, courseName: '初二英语', feedbacked: false, hourlyRate: 200 },
+  { id: 3, date: '2026-07-14', startTime: '15:00', endTime: '16:30', studentId: 3, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 4, date: '2026-07-15', startTime: '14:00', endTime: '15:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 5, date: '2026-07-15', startTime: '19:00', endTime: '20:30', studentId: 2, courseName: '初二英语', feedbacked: false, hourlyRate: 200 },
+  { id: 6, date: '2026-07-16', startTime: '15:00', endTime: '16:30', studentId: 3, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 7, date: '2026-07-17', startTime: '14:00', endTime: '15:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 8, date: '2026-07-17', startTime: '16:00', endTime: '17:30', studentId: 2, courseName: '初二英语', feedbacked: false, hourlyRate: 200 },
+  { id: 9, date: '2026-07-18', startTime: '09:00', endTime: '10:30', studentId: 3, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 10, date: '2026-07-18', startTime: '14:00', endTime: '15:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 11, date: '2026-07-18', startTime: '09:00', endTime: '10:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 12, date: '2026-07-19', startTime: '10:00', endTime: '11:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 13, date: '2026-07-19', startTime: '10:00', endTime: '11:30', studentId: 3, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
 ];
 
 let templates = JSON.parse(JSON.stringify(defaultTemplates));
@@ -2615,7 +2693,8 @@ let currentTemplateId = null;
 let editingTemplateId = null;
 let pageStack = []; // 子页面栈
 let currentTab = 'page-schedule';
-let currentDay = new Date().getDay() || 7; // 今天是周几（1-7）
+let currentDate = new Date().toISOString().split('T')[0]; // 选中的日期
+let currentMonth = new Date(); // 当前显示的月份
 let lastGeneratedContent = '';
 let lastGeneratedStudentName = '';
 let lastGeneratedCourseName = '';
@@ -2644,8 +2723,18 @@ function loadData() {
     if (savedStudents) students = JSON.parse(savedStudents);
     if (savedSchedule) schedule = JSON.parse(savedSchedule);
     if (savedHistory) feedbackHistory = JSON.parse(savedHistory);
-    // 迁移旧数据：没有 hourlyRate 的课程默认设为 200
-    schedule.forEach(s => { if (!s.hourlyRate) s.hourlyRate = 200; });
+    // 迁移旧数据：day → date, 添加 hourlyRate
+    schedule.forEach(s => {
+      if (!s.date && s.day) {
+        const today = new Date();
+        const monday = new Date(today);
+        monday.setDate(today.getDate() - (today.getDay() || 7) + 1);
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + s.day - 1);
+        s.date = d.toISOString().split('T')[0];
+      }
+      if (!s.hourlyRate) s.hourlyRate = 200;
+    });
   } catch (e) {
     console.warn('localStorage 加载失败，使用默认数据:', e);
   }
@@ -3224,49 +3313,146 @@ function saveTemplate() {
 }
 
 // ==================== 课程表页面 ====================
-function renderDayTabs() {
-  const dayNames = ['', '周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-  const container = document.getElementById('dayTabs');
-  container.innerHTML = '';
-  
-  // 计算本周日期
-  const today = new Date();
-  const todayDay = today.getDay() || 7;
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - todayDay + 1);
-  
-  for (let i = 1; i <= 7; i++) {
-    const date = new Date(monday);
-    date.setDate(monday.getDate() + i - 1);
-    const dateStr = `${date.getMonth() + 1}/${date.getDate()}`;
-    
-    const tab = document.createElement('div');
-    tab.className = 'day-tab';
-    if (i === currentDay) tab.classList.add('active');
-    if (i === todayDay) tab.classList.add('today');
-    
-    tab.innerHTML = `
-      <span class="day-name">${dayNames[i]}</span>
-      <span class="day-date">${dateStr}</span>
-    `;
-    
-    tab.addEventListener('click', function() {
-      currentDay = i;
-      renderDayTabs();
-      renderSchedule();
-    });
-    
-    container.appendChild(tab);
-  }
+function changeMonth(delta) {
+  currentMonth.setMonth(currentMonth.getMonth() + delta);
+  renderCalendar();
 }
 
-function renderSchedule() {
-  const container = document.getElementById('scheduleList');
-  const dayCourses = schedule.filter(s => s.day === currentDay).sort((a, b) => a.startTime.localeCompare(b.startTime));
+function getDateStr(d) {
+  return d.toISOString().split('T')[0];
+}
+
+function formatDateCN(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const weekNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  return `${d.getMonth() + 1}月${d.getDate()}日 ${weekNames[d.getDay()]}`;
+}
+
+function renderCalendar() {
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+  const today = new Date();
+  const todayStr = getDateStr(today);
   
-  // 更新汇总卡片
-  let totalMinutes = 0;
-  let totalIncome = 0;
+  // 更新月标题
+  document.getElementById('monthTitle').textContent = `${year}年${month + 1}月`;
+  
+  // 计算本月汇总
+  const monthCourses = schedule.filter(s => {
+    const d = new Date(s.date + 'T00:00:00');
+    return d.getFullYear() === year && d.getMonth() === month;
+  });
+  
+  let totalMinutes = 0, totalIncome = 0;
+  monthCourses.forEach(c => {
+    const [sh, sm] = c.startTime.split(':').map(Number);
+    const [eh, em] = c.endTime.split(':').map(Number);
+    const mins = (eh * 60 + em) - (sh * 60 + sm);
+    totalMinutes += mins;
+    totalIncome += (mins / 60) * (c.hourlyRate || 200);
+  });
+  document.getElementById('summaryHours').textContent = (totalMinutes / 60).toFixed(1) + 'h';
+  document.getElementById('summaryIncome').textContent = '¥' + Math.round(totalIncome);
+  
+  // 生成日历
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startDayOfWeek = firstDay.getDay() || 7; // 1=周一
+  const daysInMonth = lastDay.getDate();
+  
+  // 按日期分组课程
+  const courseMap = {};
+  schedule.forEach(s => {
+    if (!courseMap[s.date]) courseMap[s.date] = [];
+    courseMap[s.date].push(s);
+  });
+  
+  const cal = document.getElementById('calendar');
+  cal.innerHTML = `
+    <div class="cal-weekdays">
+      <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  `;
+  
+  const grid = document.getElementById('calGrid');
+  const totalCells = Math.ceil((startDayOfWeek - 1 + daysInMonth) / 7) * 7;
+  
+  // 上月填充
+  const prevMonth = new Date(year, month, 0);
+  const prevDays = prevMonth.getDate();
+  for (let i = startDayOfWeek - 2; i >= 0; i--) {
+    const d = prevDays - i;
+    const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    grid.appendChild(createCalCell(d, dateStr, true, courseMap));
+  }
+  
+  // 本月
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    grid.appendChild(createCalCell(d, dateStr, false, courseMap));
+  }
+  
+  // 下月填充
+  const remaining = totalCells - (startDayOfWeek - 1 + daysInMonth);
+  for (let d = 1; d <= remaining; d++) {
+    const dateStr = `${year}-${String(month + 2).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    grid.appendChild(createCalCell(d, dateStr, true, courseMap));
+  }
+  
+  // 渲染选中日期的详情
+  renderDayDetail();
+}
+
+function createCalCell(dayNum, dateStr, isOtherMonth, courseMap) {
+  const cell = document.createElement('div');
+  cell.className = 'cal-cell';
+  if (isOtherMonth) cell.classList.add('other-month');
+  
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  if (dateStr === todayStr) cell.classList.add('today');
+  if (dateStr === currentDate) cell.classList.add('selected');
+  
+  const courses = courseMap[dateStr];
+  if (courses && courses.length > 0) {
+    cell.classList.add('has-courses');
+    let dayTotal = 0;
+    courses.forEach(c => {
+      const [sh, sm] = c.startTime.split(':').map(Number);
+      const [eh, em] = c.endTime.split(':').map(Number);
+      const mins = (eh * 60 + em) - (sh * 60 + sm);
+      dayTotal += (mins / 60) * (c.hourlyRate || 200);
+    });
+    cell.innerHTML = `${dayNum}<span class="cal-amount">¥${Math.round(dayTotal)}</span>`;
+  } else {
+    cell.textContent = dayNum;
+  }
+  
+  cell.addEventListener('click', () => {
+    currentDate = dateStr;
+    const d = new Date(dateStr + 'T00:00:00');
+    currentMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+    renderCalendar();
+  });
+  
+  return cell;
+}
+
+function renderDayDetail() {
+  const container = document.getElementById('dayDetail');
+  const listContainer = document.getElementById('dayCourseList');
+  const dayCourses = schedule.filter(s => s.date === currentDate).sort((a, b) => a.startTime.localeCompare(b.startTime));
+  
+  if (dayCourses.length === 0) {
+    container.style.display = 'none';
+    return;
+  }
+  
+  container.style.display = 'block';
+  document.getElementById('dayDetailDate').textContent = formatDateCN(currentDate);
+  
+  let totalMinutes = 0, totalIncome = 0;
   dayCourses.forEach(c => {
     const [sh, sm] = c.startTime.split(':').map(Number);
     const [eh, em] = c.endTime.split(':').map(Number);
@@ -3274,28 +3460,14 @@ function renderSchedule() {
     totalMinutes += mins;
     totalIncome += (mins / 60) * (c.hourlyRate || 200);
   });
-  const totalHours = totalMinutes / 60;
-  document.getElementById('summaryHours').textContent = totalHours.toFixed(1) + 'h';
-  document.getElementById('summaryIncome').textContent = '¥' + Math.round(totalIncome);
-  
-  if (dayCourses.length === 0) {
-    container.innerHTML = `
-      <div class="empty-schedule">
-        <div class="icon">🌴</div>
-        <div class="text">今天没有课程安排</div>
-      </div>
-    `;
-    return;
-  }
+  document.getElementById('dayDetailSummary').textContent = `${(totalMinutes / 60).toFixed(1)}h ¥${Math.round(totalIncome)}`;
   
   const now = new Date();
-  const todayDay = now.getDay() || 7;
-  const isToday = currentDay === todayDay;
+  const todayStr = now.toISOString().split('T')[0];
+  const isToday = currentDate === todayStr;
   const nowStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   
-  container.innerHTML = '<div class="schedule-timeline"></div>';
-  const timeline = container.querySelector('.schedule-timeline');
-  
+  listContainer.innerHTML = '';
   dayCourses.forEach(course => {
     const student = students.find(s => s.id === course.studentId);
     if (!student) return;
@@ -3307,24 +3479,15 @@ function renderSchedule() {
     const rate = course.hourlyRate || 200;
     const amount = Math.round(durationHours * rate);
     
-    let status = 'pending';
-    let statusLabel = '待上课';
-    let statusClass = 'pending';
+    let status = 'pending', statusLabel = '待上课', statusClass = 'pending';
+    const courseDate = new Date(course.date + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0,0,0,0);
     
-    if (isToday) {
-      if (course.endTime < nowStr) {
-        status = 'done';
-        statusLabel = '已完成';
-        statusClass = 'done';
-      } else if (course.startTime <= nowStr && nowStr <= course.endTime) {
-        status = 'ongoing';
-        statusLabel = '进行中';
-        statusClass = 'ongoing';
-      }
-    } else if (currentDay < todayDay) {
-      status = 'done';
-      statusLabel = '已完成';
-      statusClass = 'done';
+    if (courseDate < today || (isToday && course.endTime < nowStr)) {
+      status = 'done'; statusLabel = '已完成'; statusClass = 'done';
+    } else if (isToday && course.startTime <= nowStr && nowStr <= course.endTime) {
+      status = 'ongoing'; statusLabel = '进行中'; statusClass = 'ongoing';
     }
     
     const subjClass = getSubjectClass(student.subject);
@@ -3359,7 +3522,7 @@ function renderSchedule() {
         </div>
       </div>
     `;
-    timeline.appendChild(item);
+    listContainer.appendChild(item);
   });
 }
 
@@ -3404,6 +3567,10 @@ function useScheduleCourse(courseId) {
 // 打开新增课程页面
 function openAddCourse() {
   navigateTo('page-add-course');
+  // 设置默认日期为当前选中的日期
+  setTimeout(() => {
+    document.getElementById('newDate').value = currentDate;
+  }, 50);
 }
 
 // 保存新课程
@@ -3411,12 +3578,16 @@ function saveNewCourse() {
   const name = document.getElementById('newStudentName').value.trim();
   const subject = document.getElementById('newSubject').value;
   const grade = document.getElementById('newGrade').value;
-  const day = parseInt(document.getElementById('newDay').value);
+  const date = document.getElementById('newDate').value;
   const startTime = document.getElementById('newStartTime').value;
   const endTime = document.getElementById('newEndTime').value;
 
   if (!name) {
     showToast('请输入学生姓名');
+    return;
+  }
+  if (!date) {
+    showToast('请选择上课日期');
     return;
   }
   if (!startTime || !endTime) {
@@ -3442,7 +3613,7 @@ function saveNewCourse() {
   const newCourseId = schedule.length > 0 ? Math.max(...schedule.map(s => s.id)) + 1 : 1;
   schedule.push({
     id: newCourseId,
-    day,
+    date,
     startTime,
     endTime,
     studentId: student.id,
@@ -3451,21 +3622,21 @@ function saveNewCourse() {
     hourlyRate: parseInt(document.getElementById('newHourlyRate').value) || 200
   });
 
-  // 按时间排序
-  schedule.sort((a, b) => a.day - b.day || a.startTime.localeCompare(b.startTime));
+  // 按日期和时间排序
+  schedule.sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
 
   saveData();
   showToast('课程添加成功');
-  currentDay = day;
-  renderDayTabs();
-  renderSchedule();
+  currentDate = date;
+  currentMonth = new Date(date);
+  renderCalendar();
   goBack();
 
   // 重置表单
   document.getElementById('newStudentName').value = '';
   document.getElementById('newSubject').value = '数学';
   document.getElementById('newGrade').value = '初一';
-  document.getElementById('newDay').value = '1';
+  document.getElementById('newDate').value = '';
   document.getElementById('newStartTime').value = '14:00';
   document.getElementById('newEndTime').value = '16:00';
 }
@@ -3476,7 +3647,7 @@ function toggleFeedback(courseId) {
   if (!course) return;
   course.feedbacked = !course.feedbacked;
   saveData();
-  renderSchedule();
+  renderCalendar();
 }
 
 // 显示课程操作菜单
@@ -3555,7 +3726,7 @@ function autoMarkFeedbacked() {
     if (course) {
       course.feedbacked = true;
       saveData();
-      renderSchedule();
+      renderCalendar();
     }
   }
 }
@@ -3583,8 +3754,7 @@ function deleteCourse(courseId) {
   
   showToast('删除成功');
   saveData();
-  renderSchedule();
-  renderDayTabs();
+  renderCalendar();
 }
 
 // ==================== 页面3：反馈生成 ====================
@@ -4498,17 +4668,14 @@ function printResult() {
 // ==================== 批量生成 ====================
 function startBatchGenerate() {
   const today = new Date();
-  const todayDay = today.getDay() || 7;
+  const todayStr = today.toISOString().split('T')[0];
 
-  // 本周剩余优先，再下周
-  const thisWeek = schedule.filter(s => !s.feedbacked && s.day >= todayDay)
-    .sort((a, b) => a.day - b.day || a.startTime.localeCompare(b.startTime));
-  const nextWeek = schedule.filter(s => !s.feedbacked && s.day < todayDay)
-    .sort((a, b) => a.day - b.day || a.startTime.localeCompare(b.startTime));
-  const ordered = [...thisWeek, ...nextWeek];
+  // 未反馈课程按日期排序
+  const ordered = schedule.filter(s => !s.feedbacked)
+    .sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
 
   if (ordered.length === 0) {
-    showToast('本周及下周课程均已完成反馈');
+    showToast('所有课程已完成反馈');
     return;
   }
   const firstCourse = ordered[0];
@@ -4542,21 +4709,15 @@ function renderBatchSection() {
   if (!section || !list) return;
 
   const today = new Date();
-  const todayDay = today.getDay() || 7;
-  const dayNames = ['', '周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+  const todayStr = today.toISOString().split('T')[0];
 
-  // 本周剩余：todayDay ~ 7，下周：1 ~ todayDay-1
-  const thisWeek = schedule.filter(s => !s.feedbacked && s.day >= todayDay)
-    .sort((a, b) => a.day - b.day || a.startTime.localeCompare(b.startTime));
-  const nextWeek = schedule.filter(s => !s.feedbacked && s.day < todayDay)
-    .sort((a, b) => a.day - b.day || a.startTime.localeCompare(b.startTime));
-
-  const allFiltered = [...thisWeek, ...nextWeek];
+  const allFiltered = schedule.filter(s => !s.feedbacked)
+    .sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
 
   list.innerHTML = '';
 
   if (allFiltered.length === 0) {
-    list.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;">本周及下周课程均已完成反馈</div>';
+    list.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;">所有课程已完成反馈</div>';
     return;
   }
 
@@ -4567,7 +4728,7 @@ function renderBatchSection() {
     if (!student) return;
 
     // 分组标签
-    const isThisWeek = course.day >= todayDay;
+    const isThisWeek = course.date >= todayStr;
     const sectionLabel = isThisWeek ? '本周剩余' : '下周';
     if (sectionLabel !== lastSection) {
       lastSection = sectionLabel;
@@ -4582,7 +4743,7 @@ function renderBatchSection() {
     item.innerHTML = `
       <div class="batch-item-info">
         <span class="batch-item-name">${student.name}</span>
-        <span class="batch-item-course">${course.courseName} | ${dayNames[course.day]} ${course.startTime}-${course.endTime}</span>
+        <span class="batch-item-course">${course.courseName} | ${formatDateCN(course.date)} ${course.startTime}-${course.endTime}</span>
       </div>
       <span class="batch-item-arrow">→</span>
     `;
@@ -4951,12 +5112,12 @@ function renderGroupSlots() {
   const list = document.getElementById('groupSlotList');
   const dayNames = ['', '周一', '周二', '周三', '周四', '周五', '周六', '周日'];
   
-  // 按时段分组：day + startTime + endTime
+  // 按时段分组：date + startTime + endTime
   const slotMap = {};
   schedule.forEach(course => {
-    const key = `${course.day}_${course.startTime}_${course.endTime}`;
+    const key = `${course.date}_${course.startTime}_${course.endTime}`;
     if (!slotMap[key]) {
-      slotMap[key] = { day: course.day, startTime: course.startTime, endTime: course.endTime, studentIds: [], courses: [] };
+      slotMap[key] = { date: course.date, startTime: course.startTime, endTime: course.endTime, studentIds: [], courses: [] };
     }
     slotMap[key].courses.push(course);
     slotMap[key].studentIds.push(course.studentId);
@@ -4972,8 +5133,8 @@ function renderGroupSlots() {
   
   list.innerHTML = '';
   slots.forEach(slot => {
-    const key = `${slot.day}_${slot.startTime}_${slot.endTime}`;
-    const isSelected = groupSelectedSlot && groupSelectedSlot.day === slot.day && groupSelectedSlot.startTime === slot.startTime && groupSelectedSlot.endTime === slot.endTime;
+    const key = `${slot.date}_${slot.startTime}_${slot.endTime}`;
+    const isSelected = groupSelectedSlot && groupSelectedSlot.date === slot.date && groupSelectedSlot.startTime === slot.startTime && groupSelectedSlot.endTime === slot.endTime;
     const studentNames = slot.studentIds.map(id => {
       const s = students.find(st => st.id === id);
       return s ? s.name : '未知';
@@ -4983,7 +5144,7 @@ function renderGroupSlots() {
     card.className = 'group-slot-card' + (isSelected ? ' selected' : '');
     card.innerHTML = `
       <div class="group-slot-info">
-        <span class="group-slot-time">${dayNames[slot.day]} ${slot.startTime}-${slot.endTime}</span>
+        <span class="group-slot-time">${formatDateCN(slot.date)} ${slot.startTime}-${slot.endTime}</span>
         <span class="group-slot-students">${studentNames}</span>
       </div>
       <span class="group-slot-badge">${slot.studentIds.length}人</span>
@@ -5004,7 +5165,7 @@ function selectGroupSlot(slot) {
     const s = students.find(st => st.id === id);
     return s ? s.name : '未知';
   }).join('、');
-  document.getElementById('groupSlotLegend').textContent = `已选择：${dayNames[slot.day]} ${slot.startTime}-${slot.endTime} | ${studentNames}（共${slot.studentIds.length}人）`;
+  document.getElementById('groupSlotLegend').textContent = `已选择：${formatDateCN(slot.date)} ${slot.startTime}-${slot.endTime} | ${studentNames}（共${slot.studentIds.length}人）`;
   
   renderGroupSlots();
   renderGroupPerfSelectors();
@@ -5435,8 +5596,7 @@ function autoFillEvalFromBrief(brief) {
 // ==================== 事件绑定 ====================
 document.addEventListener('DOMContentLoaded', function() {
   renderTemplateList();
-  renderDayTabs();
-  renderSchedule();
+  renderCalendar();
   
   // Tab栏切换
   document.querySelectorAll('.tab-item').forEach(tab => {
