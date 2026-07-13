@@ -383,6 +383,66 @@
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
   }
 
+  /* 重复模式切换 */
+  .repeat-toggle {
+    display: flex;
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    padding: 3px;
+    gap: 3px;
+  }
+  .repeat-toggle-btn {
+    flex: 1;
+    padding: 8px 0;
+    text-align: center;
+    border-radius: calc(var(--radius) - 2px);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+  }
+  .repeat-toggle-btn.active {
+    background: var(--white);
+    color: var(--primary);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  /* 周几选择器 */
+  .weekday-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .weekday-chip {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-strong);
+    background: var(--white);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    font-family: inherit;
+  }
+  .weekday-chip.selected {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+  }
+  .weekday-chip:active {
+    transform: scale(0.92);
+  }
+
   .form-textarea {
     width: 100%;
     padding: 14px 16px;
@@ -2361,7 +2421,30 @@
           <label class="form-label">💰 时薪（元/小时）</label>
           <input type="number" class="form-input" id="newHourlyRate" value="200" min="0" step="10" placeholder="请输入时薪">
         </div>
-        <button class="btn btn-primary btn-block" onclick="saveNewCourse()">确认添加</button>
+        <div class="form-group">
+          <label class="form-label">🔄 重复模式</label>
+          <div class="repeat-toggle" id="repeatToggle">
+            <div class="repeat-toggle-btn active" onclick="setRepeatMode('once')">单次课程</div>
+            <div class="repeat-toggle-btn" onclick="setRepeatMode('weekly')">每周重复</div>
+          </div>
+        </div>
+        <div class="form-group" id="repeatDaysGroup" style="display:none;">
+          <label class="form-label">📆 重复星期</label>
+          <div class="weekday-chips" id="weekdayChips">
+            <div class="weekday-chip" data-day="1" onclick="toggleWeekday(this)">一</div>
+            <div class="weekday-chip" data-day="2" onclick="toggleWeekday(this)">二</div>
+            <div class="weekday-chip" data-day="3" onclick="toggleWeekday(this)">三</div>
+            <div class="weekday-chip" data-day="4" onclick="toggleWeekday(this)">四</div>
+            <div class="weekday-chip" data-day="5" onclick="toggleWeekday(this)">五</div>
+            <div class="weekday-chip" data-day="6" onclick="toggleWeekday(this)">六</div>
+            <div class="weekday-chip" data-day="7" onclick="toggleWeekday(this)">日</div>
+          </div>
+        </div>
+        <div class="form-group" id="repeatEndGroup" style="display:none;">
+          <label class="form-label">📅 重复截止日期</label>
+          <input type="date" class="form-input" id="newRepeatEnd">
+        </div>
+        <button class="btn btn-primary btn-block" id="addCourseBtn" onclick="saveNewCourse()">确认添加</button>
         <div class="bottom-safe"></div>
       </div>
     </div>
@@ -2742,6 +2825,7 @@ let lastGeneratedContent = '';
 let lastGeneratedStudentName = '';
 let lastGeneratedCourseName = '';
 let feedbackHistory = []; // 反馈历史记录
+let feedbackedDates = {}; // 记录每节课的反馈状态，key: "courseId_dateStr"
 let editingCourseId = null; // 编辑模式下的课程ID
 
 // ==================== localStorage 持久化 ====================
@@ -2750,6 +2834,7 @@ function saveData() {
     localStorage.setItem('fb_templates', JSON.stringify(templates));
     localStorage.setItem('fb_students', JSON.stringify(students));
     localStorage.setItem('fb_schedule', JSON.stringify(schedule));
+    localStorage.setItem('fb_feedbacked_dates', JSON.stringify(feedbackedDates));
     localStorage.setItem('fb_history', JSON.stringify(feedbackHistory));
   } catch (e) {
     console.warn('localStorage 保存失败:', e);
@@ -2762,12 +2847,14 @@ function loadData() {
     const savedStudents = localStorage.getItem('fb_students');
     const savedSchedule = localStorage.getItem('fb_schedule');
     const savedHistory = localStorage.getItem('fb_history');
+    const savedFeedbackedDates = localStorage.getItem('fb_feedbacked_dates');
 
     if (savedTemplates) templates = JSON.parse(savedTemplates);
     if (savedStudents) students = JSON.parse(savedStudents);
     if (savedSchedule) schedule = JSON.parse(savedSchedule);
     if (savedHistory) feedbackHistory = JSON.parse(savedHistory);
-    // 迁移旧数据：day → date, 添加 hourlyRate
+    if (savedFeedbackedDates) feedbackedDates = JSON.parse(savedFeedbackedDates);
+    // 迁移旧数据：day → date, 添加 hourlyRate, 迁移 feedbacked 到 feedbackedDates
     schedule.forEach(s => {
       if (!s.date && s.day) {
         const today = new Date();
@@ -2778,6 +2865,12 @@ function loadData() {
         s.date = d.toISOString().split('T')[0];
       }
       if (!s.hourlyRate) s.hourlyRate = 200;
+      // 迁移旧的 feedbacked 布尔值到 feedbackedDates
+      if (s.feedbacked === true) {
+        const key = s.id + '_' + s.date;
+        if (!feedbackedDates[key]) feedbackedDates[key] = true;
+      }
+      delete s.feedbacked; // 移除旧字段，统一用 feedbackedDates
     });
   } catch (e) {
     console.warn('localStorage 加载失败，使用默认数据:', e);
@@ -3372,6 +3465,27 @@ function formatDateCN(dateStr) {
   return `${d.getMonth() + 1}月${d.getDate()}日 ${weekNames[d.getDay()]}`;
 }
 
+// 展开重复课程：为每个课程生成所有实际日期
+function expandCourse(course) {
+  const results = [];
+  if (course.repeatDays && course.repeatDays.length > 0) {
+    const start = new Date(course.date + 'T00:00:00');
+    const end = new Date(course.repeatEnd + 'T00:00:00');
+    const cursor = new Date(start);
+    while (cursor <= end) {
+      const dayOfWeek = cursor.getDay() || 7;
+      if (course.repeatDays.includes(dayOfWeek)) {
+        const dStr = cursor.toISOString().split('T')[0];
+        results.push({ ...course, date: dStr });
+      }
+      cursor.setDate(cursor.getDate() + 1);
+    }
+  } else {
+    results.push(course);
+  }
+  return results;
+}
+
 function renderCalendar() {
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
@@ -3382,18 +3496,20 @@ function renderCalendar() {
   document.getElementById('monthTitle').textContent = `${year}年${month + 1}月`;
   
   // 计算本月汇总
-  const monthCourses = schedule.filter(s => {
-    const d = new Date(s.date + 'T00:00:00');
-    return d.getFullYear() === year && d.getMonth() === month;
-  });
-  
   let totalMinutes = 0, totalIncome = 0;
-  monthCourses.forEach(c => {
-    const [sh, sm] = c.startTime.split(':').map(Number);
-    const [eh, em] = c.endTime.split(':').map(Number);
-    const mins = (eh * 60 + em) - (sh * 60 + sm);
-    totalMinutes += mins;
-    totalIncome += (mins / 60) * (c.hourlyRate || 200);
+  
+  const allExpanded = [];
+  schedule.forEach(s => allExpanded.push(...expandCourse(s)));
+  
+  allExpanded.forEach(c => {
+    const d = new Date(c.date + 'T00:00:00');
+    if (d.getFullYear() === year && d.getMonth() === month) {
+      const [sh, sm] = c.startTime.split(':').map(Number);
+      const [eh, em] = c.endTime.split(':').map(Number);
+      const mins = (eh * 60 + em) - (sh * 60 + sm);
+      totalMinutes += mins;
+      totalIncome += (mins / 60) * (c.hourlyRate || 200);
+    }
   });
   document.getElementById('summaryHours').textContent = (totalMinutes / 60).toFixed(1) + 'h';
   document.getElementById('summaryIncome').textContent = '¥' + Math.round(totalIncome);
@@ -3406,7 +3522,7 @@ function renderCalendar() {
   
   // 按日期分组课程
   const courseMap = {};
-  schedule.forEach(s => {
+  allExpanded.forEach(s => {
     if (!courseMap[s.date]) courseMap[s.date] = [];
     courseMap[s.date].push(s);
   });
@@ -3486,7 +3602,10 @@ function createCalCell(dayNum, dateStr, isOtherMonth, courseMap) {
 function renderDayDetail() {
   const container = document.getElementById('dayDetail');
   const listContainer = document.getElementById('dayCourseList');
-  const dayCourses = schedule.filter(s => s.date === currentDate).sort((a, b) => a.startTime.localeCompare(b.startTime));
+  // 展开所有课程，筛选当前日期的课程
+  const allExpanded = [];
+  schedule.forEach(s => allExpanded.push(...expandCourse(s)));
+  const dayCourses = allExpanded.filter(s => s.date === currentDate).sort((a, b) => a.startTime.localeCompare(b.startTime));
   
   if (dayCourses.length === 0) {
     container.style.display = 'none';
@@ -3536,7 +3655,7 @@ function renderDayDetail() {
     
     const subjClass = getSubjectClass(student.subject);
     const initial = student.name.charAt(0);
-    const feedbacked = course.feedbacked;
+    const feedbacked = feedbackedDates[course.id + '_' + course.date];
     
     const item = document.createElement('div');
     item.className = 'schedule-item';
@@ -3560,7 +3679,7 @@ function renderDayDetail() {
         <div class="sc-footer">
           <span class="sc-status ${statusClass}">${statusLabel}</span>
           <div class="sc-footer-actions">
-            <span class="sc-feedback-tag ${feedbacked ? 'done' : 'pending'}" onclick="event.stopPropagation(); toggleFeedback(${course.id})">${feedbacked ? '已反馈' : '未反馈'}</span>
+            <span class="sc-feedback-tag ${feedbacked ? 'done' : 'pending'}" onclick="event.stopPropagation(); toggleFeedback(${course.id}, '${course.date}')">${feedbacked ? '已反馈' : '未反馈'}</span>
             <div class="card-more-btn" onclick="event.stopPropagation(); showCourseMenu(event, ${course.id})">⋯</div>
           </div>
         </div>
@@ -3608,9 +3727,48 @@ function useScheduleCourse(courseId) {
   navigateTo('page-generate');
 }
 
+// ==================== 重复模式辅助函数 ====================
+let currentRepeatMode = 'once';
+
+function setRepeatMode(mode) {
+  currentRepeatMode = mode;
+  const btns = document.querySelectorAll('#repeatToggle .repeat-toggle-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  if (mode === 'once') {
+    btns[0].classList.add('active');
+    document.getElementById('repeatDaysGroup').style.display = 'none';
+    document.getElementById('repeatEndGroup').style.display = 'none';
+  } else {
+    btns[1].classList.add('active');
+    document.getElementById('repeatDaysGroup').style.display = 'block';
+    document.getElementById('repeatEndGroup').style.display = 'block';
+  }
+}
+
+function toggleWeekday(chip) {
+  chip.classList.toggle('selected');
+}
+
+function getSelectedWeekdays() {
+  const chips = document.querySelectorAll('#weekdayChips .weekday-chip.selected');
+  return Array.from(chips).map(c => parseInt(c.dataset.day));
+}
+
+function resetRepeatForm() {
+  currentRepeatMode = 'once';
+  const btns = document.querySelectorAll('#repeatToggle .repeat-toggle-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  if (btns[0]) btns[0].classList.add('active');
+  document.getElementById('repeatDaysGroup').style.display = 'none';
+  document.getElementById('repeatEndGroup').style.display = 'none';
+  document.querySelectorAll('#weekdayChips .weekday-chip').forEach(c => c.classList.remove('selected'));
+  document.getElementById('newRepeatEnd').value = '';
+}
+
 // 打开新增课程页面
 function openAddCourse() {
   editingCourseId = null;
+  resetRepeatForm();
   navigateTo('page-add-course');
   // 设置默认日期为当前选中的日期
   setTimeout(() => {
@@ -3640,6 +3798,22 @@ function openEditCourse(courseId) {
     document.getElementById('newHourlyRate').value = course.hourlyRate || 200;
     document.getElementById('addCourseTitle').textContent = '编辑课程';
     document.getElementById('addCourseBtn').textContent = '保存修改';
+    // 处理重复模式
+    if (course.repeatDays && course.repeatDays.length > 0) {
+      setRepeatMode('weekly');
+      document.querySelectorAll('#weekdayChips .weekday-chip').forEach(c => {
+        if (course.repeatDays.includes(parseInt(c.dataset.day))) {
+          c.classList.add('selected');
+        } else {
+          c.classList.remove('selected');
+        }
+      });
+      if (course.repeatEnd) {
+        document.getElementById('newRepeatEnd').value = course.repeatEnd;
+      }
+    } else {
+      resetRepeatForm();
+    }
   }, 50);
 }
 
@@ -3651,6 +3825,7 @@ function saveNewCourse() {
   const date = document.getElementById('newDate').value;
   const startTime = document.getElementById('newStartTime').value;
   const endTime = document.getElementById('newEndTime').value;
+  const hourlyRate = parseInt(document.getElementById('newHourlyRate').value) || 200;
 
   if (!name) {
     showToast('请输入学生姓名');
@@ -3667,6 +3842,26 @@ function saveNewCourse() {
   if (startTime >= endTime) {
     showToast('结束时间需晚于开始时间');
     return;
+  }
+
+  // 处理重复模式
+  let repeatDays = null;
+  let repeatEnd = null;
+  if (currentRepeatMode === 'weekly') {
+    repeatDays = getSelectedWeekdays();
+    if (repeatDays.length === 0) {
+      showToast('请至少选择一个重复星期');
+      return;
+    }
+    repeatEnd = document.getElementById('newRepeatEnd').value;
+    if (!repeatEnd) {
+      showToast('请选择重复截止日期');
+      return;
+    }
+    if (repeatEnd <= date) {
+      showToast('截止日期需晚于开始日期');
+      return;
+    }
   }
 
   const courseName = grade + subject;
@@ -3688,7 +3883,9 @@ function saveNewCourse() {
       course.endTime = endTime;
       course.studentId = student.id;
       course.courseName = courseName;
-      course.hourlyRate = parseInt(document.getElementById('newHourlyRate').value) || 200;
+      course.hourlyRate = hourlyRate;
+      course.repeatDays = repeatDays;
+      course.repeatEnd = repeatEnd;
     }
     editingCourseId = null;
     showToast('课程修改成功');
@@ -3702,8 +3899,9 @@ function saveNewCourse() {
       endTime,
       studentId: student.id,
       courseName,
-      feedbacked: false,
-      hourlyRate: parseInt(document.getElementById('newHourlyRate').value) || 200
+      hourlyRate,
+      repeatDays,
+      repeatEnd
     });
     showToast('课程添加成功');
   }
@@ -3724,13 +3922,17 @@ function saveNewCourse() {
   document.getElementById('newDate').value = '';
   document.getElementById('newStartTime').value = '14:00';
   document.getElementById('newEndTime').value = '16:00';
+  resetRepeatForm();
 }
 
 // 切换反馈状态
-function toggleFeedback(courseId) {
-  const course = schedule.find(s => s.id === courseId);
-  if (!course) return;
-  course.feedbacked = !course.feedbacked;
+function toggleFeedback(courseId, dateStr) {
+  const key = courseId + '_' + dateStr;
+  if (feedbackedDates[key]) {
+    delete feedbackedDates[key];
+  } else {
+    feedbackedDates[key] = true;
+  }
   saveData();
   renderCalendar();
 }
@@ -3813,7 +4015,7 @@ function autoMarkFeedbacked() {
   if (currentCourseId !== null) {
     const course = schedule.find(s => s.id === currentCourseId);
     if (course) {
-      course.feedbacked = true;
+      feedbackedDates[currentCourseId + '_' + course.date] = true;
       saveData();
       renderCalendar();
     }
@@ -3828,7 +4030,13 @@ function deleteCourse(courseId) {
   const student = students.find(s => s.id === course.studentId);
   const studentName = student ? student.name : '';
   
-  if (!confirm(`确定要删除「${studentName} ${course.courseName}」这节课吗？`)) return;
+  const label = course.repeatDays ? '该重复课程的所有记录' : '这节课';
+  if (!confirm(`确定要删除「${studentName} ${course.courseName}」${label}吗？`)) return;
+  
+  // 清理反馈状态
+  Object.keys(feedbackedDates).forEach(key => {
+    if (key.startsWith(courseId + '_')) delete feedbackedDates[key];
+  });
   
   // 删除课程
   schedule = schedule.filter(s => s.id !== courseId);
@@ -4718,6 +4926,7 @@ function exportAllData() {
     students: students,
     templates: templates,
     feedbackHistory: feedbackHistory,
+    feedbackedDates: feedbackedDates,
     exportTime: new Date().toISOString()
   };
   const json = JSON.stringify(data, null, 2);
@@ -4748,6 +4957,9 @@ function importAllData() {
         if (data.students) students = data.students;
         if (data.templates) templates = data.templates;
         if (data.feedbackHistory) feedbackHistory = data.feedbackHistory;
+        if (data.feedbackedDates) feedbackedDates = data.feedbackedDates;
+        // 清理旧数据中的 feedbacked 字段
+        schedule.forEach(s => { if (s.feedbacked !== undefined) delete s.feedbacked; });
         saveData();
         renderCalendar();
         renderHistoryPage();
@@ -4809,7 +5021,7 @@ function startBatchGenerate() {
   const todayStr = today.toISOString().split('T')[0];
 
   // 未反馈课程按日期排序
-  const ordered = schedule.filter(s => !s.feedbacked)
+  const ordered = schedule.filter(s => !feedbackedDates[s.id + '_' + s.date])
     .sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
 
   if (ordered.length === 0) {
@@ -4849,7 +5061,7 @@ function renderBatchSection() {
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
 
-  const allFiltered = schedule.filter(s => !s.feedbacked)
+  const allFiltered = schedule.filter(s => !feedbackedDates[s.id + '_' + s.date])
     .sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
 
   list.innerHTML = '';
