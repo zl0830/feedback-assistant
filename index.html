@@ -388,35 +388,50 @@
     gap: 12px;
   }
 
-  .tpl-delete-btn {
-    display: inline-flex;
+  /* 滑动删除 */
+  .tpl-swipe-wrap {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+  }
+
+  .tpl-swipe-del {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 72px;
+    background: var(--danger);
+    border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+    display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--danger-light);
-    color: var(--danger);
-    font-size: 16px;
-    font-weight: 700;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 500;
     cursor: pointer;
-    line-height: 1;
     user-select: none;
     -webkit-user-select: none;
-    transition: background 0.2s, color 0.2s;
+    letter-spacing: 1px;
   }
 
-  .tpl-delete-btn:active {
-    background: var(--danger);
-    color: #fff;
-  }
-
-  .template-card {
+  .tpl-swipe-inner {
+    position: relative;
+    z-index: 1;
     background: var(--white);
-    padding: 18px;
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .tpl-swipe-inner.swiped {
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  }
+
+  .template-card {
+    padding: 18px;
   }
 
   .template-card-header {
@@ -3452,15 +3467,24 @@ function renderTemplateList() {
     const tplStudents = students.filter(s => s.courseName && s.courseName.includes(tpl.subject));
     const studentNames = tplStudents.map(s => s.name).join('、');
 
+    const wrap = document.createElement('div');
+    wrap.className = 'tpl-swipe-wrap';
+
+    const delBtn = document.createElement('div');
+    delBtn.className = 'tpl-swipe-del';
+    delBtn.textContent = '删除';
+    delBtn.onclick = (e) => { e.stopPropagation(); deleteTemplate(tpl.id); };
+    wrap.appendChild(delBtn);
+
+    const inner = document.createElement('div');
+    inner.className = 'tpl-swipe-inner';
+
     const card = document.createElement('div');
     card.className = 'template-card';
     card.innerHTML = `
       <div class="template-card-header">
         <div class="template-card-title">${tpl.name}</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span class="subject-tag ${subjClass}">${tpl.subject}</span>
-          <span class="tpl-delete-btn" onclick="event.stopPropagation();deleteTemplate(${tpl.id})" title="删除模板">×</span>
-        </div>
+        <span class="subject-tag ${subjClass}">${tpl.subject}</span>
       </div>
       <div class="template-card-desc">${(tpl.header || tpl.content || '').substring(0, 60).replace(/\n/g, ' ')}...</div>
       <div class="template-card-footer">
@@ -3471,9 +3495,88 @@ function renderTemplateList() {
         </div>
       </div>
     `;
-    list.appendChild(card);
+    inner.appendChild(card);
+    wrap.appendChild(inner);
+
+    // 滑动状态
+    let startX = 0, startY = 0, moveX = 0, swiped = false;
+    const DEL_W = 72;
+
+    function open() {
+      inner.style.transform = `translateX(-${DEL_W}px)`;
+      inner.classList.add('swiped');
+      swiped = true;
+    }
+    function close() {
+      inner.style.transform = 'translateX(0)';
+      inner.classList.remove('swiped');
+      swiped = false;
+    }
+
+    inner.addEventListener('touchstart', (e) => {
+      // 关闭其他已展开的
+      tplSwipeCloseAll(inner);
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      moveX = 0;
+      inner.style.transition = 'none';
+    }, { passive: true });
+
+    inner.addEventListener('touchmove', (e) => {
+      const dx = e.touches[0].clientX - startX;
+      const dy = e.touches[0].clientY - startY;
+      if (swiped) {
+        // 已展开：只允许向右滑回
+        if (dx > 0) {
+          e.preventDefault();
+          moveX = Math.min(dx - DEL_W, 0);
+          inner.style.transform = `translateX(${moveX}px)`;
+        }
+      } else if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) && dx < 0) {
+        // 未展开：检测到水平左滑
+        e.preventDefault();
+        moveX = Math.max(dx, -DEL_W);
+        inner.style.transform = `translateX(${moveX}px)`;
+      }
+    }, { passive: false });
+
+    inner.addEventListener('touchend', () => {
+      inner.style.transition = 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
+      if (swiped) {
+        moveX < -DEL_W / 2 ? open() : close();
+      } else {
+        moveX < -DEL_W / 2 ? open() : close();
+      }
+    });
+
+    // 点击已展开的卡片关掉
+    inner.addEventListener('click', (e) => {
+      if (swiped && !e.target.closest('button') && !e.target.closest('.tpl-swipe-del')) {
+        close();
+      }
+    });
+
+    list.appendChild(wrap);
   });
 }
+
+// 全局：关闭所有已展开的滑动卡片
+function tplSwipeCloseAll(except) {
+  document.querySelectorAll('.tpl-swipe-inner.swiped').forEach(el => {
+    if (el !== except) {
+      el.style.transition = 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
+      el.style.transform = 'translateX(0)';
+      el.classList.remove('swiped');
+    }
+  });
+}
+
+// 全局点击关闭
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.tpl-swipe-wrap')) {
+    tplSwipeCloseAll();
+  }
+});
 
 function deleteTemplate(id) {
   const tpl = templates.find(t => t.id === id);
