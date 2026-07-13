@@ -2724,6 +2724,14 @@
               </label>
             </div>
           </div>
+          <div class="length-selector" style="margin-top:12px;display:flex;align-items:center;gap:8px;">
+            <span style="font-size:13px;color:var(--text-secondary);">评价长度：</span>
+            <div class="length-btns">
+              <button class="length-btn" data-length="short">简短</button>
+              <button class="length-btn active" data-length="medium">适中</button>
+              <button class="length-btn" data-length="long">详细</button>
+            </div>
+          </div>
         </div>
         <button class="btn btn-primary btn-block" id="groupGenerateBtn" onclick="generateGroupFeedback()">🤖 批量生成反馈</button>
         <div class="bottom-safe"></div>
@@ -5842,6 +5850,8 @@ function generateGroupFeedback() {
         } else if (mod === '学生表现') {
           const perfData = groupPerfSelections[student.id] || {};
           const dimKeys = Object.keys(perfData);
+          const evalLength = getSelectedLength();
+          
           if (dimKeys.length > 0) {
             const goodLabels = [];
             const badLabels = [];
@@ -5849,18 +5859,76 @@ function generateGroupFeedback() {
               const dim = evaluationDimensions.find(d => d.id === dimId);
               const label = dim ? dim.label.replace(/[^\u4e00-\u9fa5]/g, '').trim() : dimId;
               if (perfData[dimId] === 'good') {
-                goodLabels.push(label + '表现好');
+                goodLabels.push(label);
               } else {
-                badLabels.push(label + '需加强');
+                badLabels.push(label);
               }
             });
-            let evalText = student.name + '同学本节课';
-            if (goodLabels.length > 0) evalText += goodLabels.join('，') + '。';
-            if (badLabels.length > 0) evalText += '但在' + badLabels.join('，') + '。';
-            evalText += '保持努力，继续加油！';
+            
+            let evalText = '';
+            if (evalLength === 'short') {
+              evalText = student.name + '同学本节课';
+              if (goodLabels.length > 0 && badLabels.length === 0) {
+                evalText += '表现良好，在' + goodLabels.slice(0, 3).join('、') + '方面表现突出。';
+              } else if (badLabels.length > 0 && goodLabels.length === 0) {
+                evalText += '需要加强' + badLabels.slice(0, 2).join('、') + '方面的表现，加油！';
+              } else if (goodLabels.length > 0 && badLabels.length > 0) {
+                evalText += '在' + goodLabels.slice(0, 2).join('、') + '方面表现不错，但' + badLabels.slice(0, 2).join('、') + '还需加强。';
+              } else {
+                evalText += '表现平稳，继续保持努力。';
+              }
+            } else if (evalLength === 'long') {
+              evalText = student.name + '同学本节课';
+              if (goodLabels.length > 0 && badLabels.length === 0) {
+                evalText += '表现优秀！';
+              } else if (goodLabels.length > badLabels.length) {
+                evalText += '整体表现良好，';
+              } else if (badLabels.length > goodLabels.length) {
+                evalText += '需要多加努力，';
+              } else {
+                evalText += '表现尚可，';
+              }
+              if (goodLabels.length > 0) {
+                evalText += '在' + goodLabels.join('、') + '方面表现突出，';
+                if (perfData.attention === 'good') evalText += '课堂上注意力集中，';
+                if (perfData.participation === 'good') evalText += '积极参与互动，';
+                if (perfData.comprehension === 'good') evalText += '知识理解能力较强，';
+                if (perfData.homework === 'good') evalText += '作业完成质量高，';
+                if (perfData.progress === 'good') evalText += '有明显进步，';
+                if (perfData.attitude === 'good') evalText += '学习态度端正，';
+                if (perfData.confidence === 'good') evalText += '自信心充足，';
+                if (perfData.teamwork === 'good') evalText += '合作交流顺畅，';
+              }
+              if (badLabels.length > 0) {
+                evalText += '但在' + badLabels.join('、') + '方面还有提升空间。';
+                if (perfData.attention === 'bad') evalText += '建议提高课堂专注力；';
+                if (perfData.participation === 'bad') evalText += '建议更积极参与互动；';
+                if (perfData.comprehension === 'bad') evalText += '建议课后多复习巩固；';
+                if (perfData.homework === 'bad') evalText += '建议按时完成作业；';
+                if (perfData.progress === 'bad') evalText += '建议调整学习方法；';
+                if (perfData.attitude === 'bad') evalText += '建议端正学习态度；';
+                if (perfData.confidence === 'bad') evalText += '建议增强自信心；';
+                if (perfData.teamwork === 'bad') evalText += '建议多与同学交流；';
+              } else if (goodLabels.length > 0) {
+                evalText += '希望继续保持，再接再厉！';
+              }
+            } else {
+              // medium（适中）
+              evalText = student.name + '同学本节课';
+              if (goodLabels.length > 0) evalText += goodLabels.slice(0, 4).join('、') + '方面表现不错。';
+              if (badLabels.length > 0) evalText += '但在' + badLabels.slice(0, 3).join('、') + '方面需要加强。';
+              evalText += '保持努力，继续加油！';
+            }
             content += '\n【学生表现】\n' + evalText + '\n';
           } else {
-            content += '\n【学生表现】\n' + student.name + '同学本节课表现良好，继续加油！\n';
+            // 未选择维度
+            if (evalLength === 'short') {
+              content += '\n【学生表现】\n' + student.name + '同学本节课表现平稳，完成了学习任务。\n';
+            } else if (evalLength === 'long') {
+              content += '\n【学生表现】\n' + student.name + '同学本节课整体表现平稳，能够完成课堂学习任务。建议继续保持，不断进步。\n';
+            } else {
+              content += '\n【学生表现】\n' + student.name + '同学本节课表现良好，继续加油！\n';
+            }
           }
         } else if (mod === '作业布置') {
           if (sharedContent.homework) {
