@@ -1218,6 +1218,31 @@
     text-align: center;
   }
 
+  /* ===== 批量操作按钮 ===== */
+  .batch-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .batch-btn {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--white);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .batch-btn:active {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
   /* ===== 日历 ===== */
   .calendar {
     background: var(--white);
@@ -2204,6 +2229,10 @@
             <div class="summary-label">本月收入</div>
             <div class="summary-value" id="summaryIncome">¥0</div>
           </div>
+        </div>
+        <div class="batch-actions">
+          <div class="batch-btn" onclick="startBatchGenerate()">⚡ 批量生成反馈</div>
+          <div class="batch-btn" onclick="openGroupClassPage()">👥 班课批量生成</div>
         </div>
         <div class="calendar" id="calendar"></div>
         <div class="day-detail" id="dayDetail" style="display:none;">
