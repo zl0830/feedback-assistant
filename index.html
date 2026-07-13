@@ -388,18 +388,35 @@
     gap: 12px;
   }
 
-  .template-card {
-    background: var(--white);
-    border-radius: var(--radius-lg);
-    padding: 18px;
-    box-shadow: var(--shadow);
-    transition: transform 0.2s, box-shadow 0.2s;
-    border: 1px solid var(--border);
+  .tpl-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--danger-light);
+    color: var(--danger);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: background 0.2s, color 0.2s;
   }
 
-  .template-card:active {
-    transform: scale(0.98);
-    box-shadow: var(--shadow-md);
+  .tpl-delete-btn:active {
+    background: var(--danger);
+    color: #fff;
+  }
+
+  .template-card {
+    background: var(--white);
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
   }
 
   .template-card-header {
@@ -3431,16 +3448,19 @@ function renderTemplateList() {
   list.innerHTML = '';
   
   templates.forEach(tpl => {
-    const card = document.createElement('div');
-    card.className = 'template-card';
     const subjClass = getSubjectClass(tpl.subject);
-    // 找到使用该模板科目的学生
     const tplStudents = students.filter(s => s.courseName && s.courseName.includes(tpl.subject));
     const studentNames = tplStudents.map(s => s.name).join('、');
+
+    const card = document.createElement('div');
+    card.className = 'template-card';
     card.innerHTML = `
       <div class="template-card-header">
         <div class="template-card-title">${tpl.name}</div>
-        <span class="subject-tag ${subjClass}">${tpl.subject}</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="subject-tag ${subjClass}">${tpl.subject}</span>
+          <span class="tpl-delete-btn" onclick="event.stopPropagation();deleteTemplate(${tpl.id})" title="删除模板">×</span>
+        </div>
       </div>
       <div class="template-card-desc">${(tpl.header || tpl.content || '').substring(0, 60).replace(/\n/g, ' ')}...</div>
       <div class="template-card-footer">
@@ -3453,6 +3473,22 @@ function renderTemplateList() {
     `;
     list.appendChild(card);
   });
+}
+
+function deleteTemplate(id) {
+  const tpl = templates.find(t => t.id === id);
+  if (!tpl) return;
+  showConfirmDialog(
+    `确定要删除模板「${tpl.name}」吗？`,
+    '确认删除',
+    '取消',
+    () => {
+      templates = templates.filter(t => t.id !== id);
+      saveData();
+      renderTemplateList();
+      showToast('模板已删除');
+    }
+  );
 }
 
 function useTemplate(id) {
