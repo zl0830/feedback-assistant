@@ -1185,22 +1185,6 @@
   }
 
   /* ===== 课程表页面 ===== */
-  .schedule-header {
-    padding: 8px 4px 16px;
-  }
-
-  .schedule-header h1 {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-  }
-
-  .schedule-header p {
-    font-size: 13px;
-    color: var(--text-secondary);
-  }
-
   .day-tabs {
     display: flex;
     gap: 4px;
@@ -1262,90 +1246,181 @@
     background: var(--white);
   }
 
+  /* ===== 今日汇总卡片 ===== */
+  .summary-card {
+    background: var(--primary-gradient);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 16px rgba(79, 70, 229, 0.25);
+  }
+  .summary-left, .summary-right {
+    flex: 1;
+    text-align: center;
+  }
+  .summary-divider {
+    width: 1px;
+    height: 40px;
+    background: rgba(255,255,255,0.3);
+  }
+  .summary-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .summary-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+
   /* 课程时间轴 */
   .schedule-timeline {
     position: relative;
-    padding-left: 8px;
   }
-
-  .schedule-timeline::before {
-    content: '';
-    position: absolute;
-    left: 12px;
-    top: 8px;
-    bottom: 8px;
-    width: 2px;
-    background: var(--border-strong);
-    border-radius: 1px;
-  }
-
   .schedule-item {
-    position: relative;
-    padding-left: 32px;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
   }
 
-  .schedule-item::before {
-    content: '';
-    position: absolute;
-    left: 7px;
-    top: 16px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--white);
-    border: 3px solid var(--primary);
-    z-index: 1;
-  }
-
-  .schedule-item.done::before {
-    border-color: var(--success);
-    background: var(--success);
-  }
-
+  /* 极简课程卡片 */
   .schedule-card {
-    position: relative;
     background: var(--white);
-    border-radius: var(--radius-lg);
-    padding: 16px;
-    box-shadow: var(--shadow);
+    border-radius: var(--radius);
+    padding: 0;
+    box-shadow: var(--shadow-sm);
     border: 1px solid var(--border);
-    border-left: 4px solid var(--primary);
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.15s, box-shadow 0.15s;
+    overflow: hidden;
   }
-
-  .schedule-card {
-    position: relative;
-    background: var(--white);
-    border-radius: var(--radius-lg);
-    padding: 16px;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-    border-left: 4px solid var(--primary);
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-
   .schedule-card:active {
-    transform: scale(0.98);
+    transform: scale(0.985);
+    box-shadow: var(--shadow);
+  }
+  .schedule-card.feedbacked {
+    opacity: 0.65;
   }
 
-  .schedule-card.math { border-left-color: var(--primary); }
-  .schedule-card.english { border-left-color: var(--purple); }
-  .schedule-card.chinese { border-left-color: #f59e0b; }
-  .schedule-card.physics { border-left-color: #06b6d4; }
-  .schedule-card.chemistry { border-left-color: #10b981; }
-  .schedule-card.biology { border-left-color: #84cc16; }
-  .schedule-card.history { border-left-color: #ef4444; }
-  .schedule-card.geography { border-left-color: #3b82f6; }
-  .schedule-card.politics { border-left-color: #ec4899; }
-  .schedule-card.default { border-left-color: var(--text-muted); }
+  .sc-main {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  .sc-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .sc-avatar.math { background: var(--primary); }
+  .sc-avatar.english { background: var(--purple); }
+  .sc-avatar.chinese { background: #f59e0b; }
+  .sc-avatar.physics { background: #06b6d4; }
+  .sc-avatar.chemistry { background: #10b981; }
+  .sc-avatar.biology { background: #84cc16; }
+  .sc-avatar.history { background: #ef4444; }
+  .sc-avatar.geography { background: #3b82f6; }
+  .sc-avatar.politics { background: #ec4899; }
+  .sc-avatar.default { background: var(--text-muted); }
 
-  .card-top-actions {
+  .sc-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .sc-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+  .sc-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
     display: flex;
     align-items: center;
     gap: 6px;
+  }
+  .sc-right {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .sc-duration {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .sc-amount {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--success);
+    margin-top: 2px;
+  }
+  .sc-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    background: #FAFBFC;
+  }
+  .sc-status {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 10px;
+  }
+  .sc-status.pending {
+    background: var(--warning-light);
+    color: #B45309;
+  }
+  .sc-status.done {
+    background: var(--success-light);
+    color: var(--success);
+  }
+  .sc-status.ongoing {
+    background: var(--info-light);
+    color: var(--info);
+  }
+  .sc-action {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary);
+    cursor: pointer;
+  }
+  .sc-action:active {
+    opacity: 0.7;
+  }
+
+  .sc-feedback-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .sc-feedback-tag.pending {
+    background: #fef3c7;
+    color: #d97706;
+  }
+  .sc-feedback-tag.done {
+    background: #d1fae5;
+    color: #059669;
+  }
+  .sc-feedback-tag:active {
+    transform: scale(0.92);
   }
 
   .card-more-btn {
@@ -1363,10 +1438,14 @@
     user-select: none;
     line-height: 1;
   }
-
   .card-more-btn:active {
     background: #e5e7eb;
     transform: scale(0.92);
+  }
+  .sc-footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .course-menu-overlay {
@@ -1381,28 +1460,24 @@
     align-items: flex-end;
     justify-content: center;
   }
-
   .course-menu-sheet {
     width: 100%;
-    max-width: 375px;
+    max-width: 430px;
     background: var(--white);
     border-radius: 16px 16px 0 0;
     padding: 8px 16px 24px;
     animation: slideUp 0.25s ease;
   }
-
   @keyframes slideUp {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
   }
-
   .course-menu-title {
     text-align: center;
     font-size: 13px;
     color: var(--text-muted);
     padding: 12px 0;
   }
-
   .course-menu-item {
     display: flex;
     align-items: center;
@@ -1413,21 +1488,17 @@
     font-size: 15px;
     transition: background 0.15s;
   }
-
   .course-menu-item:active {
     background: #f3f4f6;
   }
-
   .course-menu-item.danger {
     color: #ef4444;
   }
-
   .course-menu-item .menu-icon {
     font-size: 18px;
     width: 24px;
     text-align: center;
   }
-
   .course-menu-cancel {
     margin-top: 8px;
     background: #f3f4f6;
@@ -1438,136 +1509,8 @@
     font-weight: 500;
     cursor: pointer;
   }
-
   .course-menu-cancel:active {
     background: #e5e7eb;
-  }
-
-  .schedule-top-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-
-  .schedule-time {
-    font-size: 12px;
-    color: var(--text-muted);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .feedback-tag-outer {
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    user-select: none;
-  }
-
-  .feedback-tag-outer.pending {
-    background: #fef3c7;
-    color: #d97706;
-    border: 1px solid #fde68a;
-  }
-
-  .feedback-tag-outer.pending::before {
-    content: '';
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #d97706;
-    margin-right: 5px;
-    vertical-align: middle;
-  }
-
-  .feedback-tag-outer.done {
-    background: #d1fae5;
-    color: #059669;
-    border: 1px solid #a7f3d0;
-  }
-
-  .feedback-tag-outer.done::before {
-    content: '';
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #059669;
-    margin-right: 5px;
-    vertical-align: middle;
-  }
-
-  .feedback-tag-outer:active {
-    transform: scale(0.92);
-  }
-
-  .schedule-card.feedbacked {
-    opacity: 0.75;
-  }
-
-  .schedule-card.feedbacked .schedule-student,
-  .schedule-card.feedbacked .schedule-course-name {
-    color: var(--text-muted);
-  }
-
-  .schedule-student {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-  }
-
-  .schedule-course {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .schedule-course-name {
-    font-size: 13px;
-    color: var(--text-secondary);
-    font-weight: 500;
-  }
-
-  .schedule-status {
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-weight: 600;
-  }
-
-  .schedule-status.done {
-    background: var(--success-light);
-    color: var(--success);
-  }
-
-  .schedule-status.pending {
-    background: var(--warning-light);
-    color: #B45309;
-  }
-
-  .schedule-status.ongoing {
-    background: var(--info-light);
-    color: var(--info);
-  }
-
-  .schedule-action {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px dashed var(--border-strong);
-    font-size: 13px;
-    color: var(--primary);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 4px;
   }
 
   .empty-schedule {
@@ -1575,13 +1518,11 @@
     padding: 60px 20px;
     color: var(--text-muted);
   }
-
   .empty-schedule .icon {
     font-size: 48px;
     margin-bottom: 12px;
     opacity: 0.5;
   }
-
   .empty-schedule .text {
     font-size: 14px;
   }
@@ -2172,10 +2113,16 @@
         <div class="right-btn" onclick="openHistoryPage()">历史</div>
       </div>
       <div class="page-content">
-        <div class="schedule-header">
-          <h1>本周课程</h1>
-          <p>点击课程快速生成课后反馈</p>
-          <button class="btn btn-outline btn-sm" id="groupClassBtn" style="margin-top:10px;width:100%;border-color:var(--primary);color:var(--primary);" onclick="openGroupClassPage()">👥 班课批量生成（同一时段多学生）</button>
+        <div class="summary-card" id="summaryCard">
+          <div class="summary-left">
+            <div class="summary-label">今日工时</div>
+            <div class="summary-value" id="summaryHours">0h</div>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-right">
+            <div class="summary-label">今日收入</div>
+            <div class="summary-value" id="summaryIncome">¥0</div>
+          </div>
         </div>
         <div class="day-tabs" id="dayTabs"></div>
         <div id="scheduleList"></div>
@@ -2288,6 +2235,10 @@
             <span style="padding:0 6px;color:var(--text-secondary);">-</span>
             <input type="time" class="form-input" id="newEndTime" value="16:00" style="flex:1;">
           </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">💰 时薪（元/小时）</label>
+          <input type="number" class="form-input" id="newHourlyRate" value="200" min="0" step="10" placeholder="请输入时薪">
         </div>
         <button class="btn btn-primary btn-block" onclick="saveNewCourse()">确认添加</button>
         <div class="bottom-safe"></div>
@@ -2643,20 +2594,20 @@ let students = [
 // 预设课程表数据（day: 1=周一 ... 7=周日，feedbacked: 是否已生成反馈）
 // 注意：同一 day + startTime + endTime 的课程视为班课（同一时段多学生）
 let schedule = [
-  { id: 1, day: 1, startTime: '14:00', endTime: '15:30', studentId: 1, courseName: '初三数学', feedbacked: false },
-  { id: 2, day: 1, startTime: '16:00', endTime: '17:30', studentId: 2, courseName: '初二英语', feedbacked: false },
-  { id: 3, day: 2, startTime: '15:00', endTime: '16:30', studentId: 3, courseName: '初三数学', feedbacked: false },
-  { id: 4, day: 3, startTime: '14:00', endTime: '15:30', studentId: 1, courseName: '初三数学', feedbacked: false },
-  { id: 5, day: 3, startTime: '19:00', endTime: '20:30', studentId: 2, courseName: '初二英语', feedbacked: false },
-  { id: 6, day: 4, startTime: '15:00', endTime: '16:30', studentId: 3, courseName: '初三数学', feedbacked: false },
-  { id: 7, day: 5, startTime: '14:00', endTime: '15:30', studentId: 1, courseName: '初三数学', feedbacked: false },
-  { id: 8, day: 5, startTime: '16:00', endTime: '17:30', studentId: 2, courseName: '初二英语', feedbacked: false },
-  { id: 9, day: 6, startTime: '09:00', endTime: '10:30', studentId: 3, courseName: '初三数学', feedbacked: false },
-  { id: 10, day: 6, startTime: '14:00', endTime: '15:30', studentId: 1, courseName: '初三数学', feedbacked: false },
+  { id: 1, day: 1, startTime: '14:00', endTime: '15:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 2, day: 1, startTime: '16:00', endTime: '17:30', studentId: 2, courseName: '初二英语', feedbacked: false, hourlyRate: 200 },
+  { id: 3, day: 2, startTime: '15:00', endTime: '16:30', studentId: 3, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 4, day: 3, startTime: '14:00', endTime: '15:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 5, day: 3, startTime: '19:00', endTime: '20:30', studentId: 2, courseName: '初二英语', feedbacked: false, hourlyRate: 200 },
+  { id: 6, day: 4, startTime: '15:00', endTime: '16:30', studentId: 3, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 7, day: 5, startTime: '14:00', endTime: '15:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 8, day: 5, startTime: '16:00', endTime: '17:30', studentId: 2, courseName: '初二英语', feedbacked: false, hourlyRate: 200 },
+  { id: 9, day: 6, startTime: '09:00', endTime: '10:30', studentId: 3, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 10, day: 6, startTime: '14:00', endTime: '15:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
   // 班课示例：同一时段多学生
-  { id: 11, day: 6, startTime: '09:00', endTime: '10:30', studentId: 1, courseName: '初三数学', feedbacked: false },
-  { id: 12, day: 7, startTime: '10:00', endTime: '11:30', studentId: 1, courseName: '初三数学', feedbacked: false },
-  { id: 13, day: 7, startTime: '10:00', endTime: '11:30', studentId: 3, courseName: '初三数学', feedbacked: false },
+  { id: 11, day: 6, startTime: '09:00', endTime: '10:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 12, day: 7, startTime: '10:00', endTime: '11:30', studentId: 1, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
+  { id: 13, day: 7, startTime: '10:00', endTime: '11:30', studentId: 3, courseName: '初三数学', feedbacked: false, hourlyRate: 200 },
 ];
 
 let templates = JSON.parse(JSON.stringify(defaultTemplates));
@@ -2693,6 +2644,8 @@ function loadData() {
     if (savedStudents) students = JSON.parse(savedStudents);
     if (savedSchedule) schedule = JSON.parse(savedSchedule);
     if (savedHistory) feedbackHistory = JSON.parse(savedHistory);
+    // 迁移旧数据：没有 hourlyRate 的课程默认设为 200
+    schedule.forEach(s => { if (!s.hourlyRate) s.hourlyRate = 200; });
   } catch (e) {
     console.warn('localStorage 加载失败，使用默认数据:', e);
   }
@@ -3311,6 +3264,20 @@ function renderSchedule() {
   const container = document.getElementById('scheduleList');
   const dayCourses = schedule.filter(s => s.day === currentDay).sort((a, b) => a.startTime.localeCompare(b.startTime));
   
+  // 更新汇总卡片
+  let totalMinutes = 0;
+  let totalIncome = 0;
+  dayCourses.forEach(c => {
+    const [sh, sm] = c.startTime.split(':').map(Number);
+    const [eh, em] = c.endTime.split(':').map(Number);
+    const mins = (eh * 60 + em) - (sh * 60 + sm);
+    totalMinutes += mins;
+    totalIncome += (mins / 60) * (c.hourlyRate || 200);
+  });
+  const totalHours = totalMinutes / 60;
+  document.getElementById('summaryHours').textContent = totalHours.toFixed(1) + 'h';
+  document.getElementById('summaryIncome').textContent = '¥' + Math.round(totalIncome);
+  
   if (dayCourses.length === 0) {
     container.innerHTML = `
       <div class="empty-schedule">
@@ -3321,7 +3288,6 @@ function renderSchedule() {
     return;
   }
   
-  // 获取当前时间，判断课程状态
   const now = new Date();
   const todayDay = now.getDay() || 7;
   const isToday = currentDay === todayDay;
@@ -3334,7 +3300,13 @@ function renderSchedule() {
     const student = students.find(s => s.id === course.studentId);
     if (!student) return;
     
-    // 判断课程状态
+    const [sh, sm] = course.startTime.split(':').map(Number);
+    const [eh, em] = course.endTime.split(':').map(Number);
+    const durationMins = (eh * 60 + em) - (sh * 60 + sm);
+    const durationHours = durationMins / 60;
+    const rate = course.hourlyRate || 200;
+    const amount = Math.round(durationHours * rate);
+    
     let status = 'pending';
     let statusLabel = '待上课';
     let statusClass = 'pending';
@@ -3356,29 +3328,33 @@ function renderSchedule() {
     }
     
     const subjClass = getSubjectClass(student.subject);
+    const initial = student.name.charAt(0);
+    const feedbacked = course.feedbacked;
     
     const item = document.createElement('div');
-    item.className = `schedule-item ${status === 'done' ? 'done' : ''}`;
-    const feedbacked = course.feedbacked;
+    item.className = 'schedule-item';
     item.innerHTML = `
-      <div class="schedule-card ${subjClass} ${feedbacked ? 'feedbacked' : ''}">
-        <div class="schedule-top-row">
-          <div class="schedule-time">${course.startTime} - ${course.endTime}</div>
-          <div class="card-top-actions">
-            <div class="feedback-tag-outer ${feedbacked ? 'done' : 'pending'}" onclick="event.stopPropagation(); toggleFeedback(${course.id})">
-              ${feedbacked ? '已反馈' : '未反馈'}
+      <div class="schedule-card ${feedbacked ? 'feedbacked' : ''}" onclick="useScheduleCourse(${course.id})">
+        <div class="sc-main">
+          <div class="sc-avatar ${subjClass}">${initial}</div>
+          <div class="sc-info">
+            <div class="sc-name">${student.name}</div>
+            <div class="sc-meta">
+              <span>${course.courseName}</span>
+              <span>·</span>
+              <span>${course.startTime} - ${course.endTime}</span>
             </div>
-            <div class="card-more-btn" onclick="event.stopPropagation(); showCourseMenu(event, ${course.id})">⋯</div>
+          </div>
+          <div class="sc-right">
+            <div class="sc-duration">${durationHours.toFixed(1)}h</div>
+            <div class="sc-amount">¥${amount}</div>
           </div>
         </div>
-        <div onclick="useScheduleCourse(${course.id})">
-          <div class="schedule-student">${student.name}</div>
-          <div class="schedule-course">
-            <span class="schedule-course-name">${course.courseName}</span>
-            <span class="schedule-status ${statusClass}">${statusLabel}</span>
-          </div>
-          <div class="schedule-action">
-            ${status === 'done' ? '生成课后反馈 →' : '查看详情 →'}
+        <div class="sc-footer">
+          <span class="sc-status ${statusClass}">${statusLabel}</span>
+          <div class="sc-footer-actions">
+            <span class="sc-feedback-tag ${feedbacked ? 'done' : 'pending'}" onclick="event.stopPropagation(); toggleFeedback(${course.id})">${feedbacked ? '已反馈' : '未反馈'}</span>
+            <div class="card-more-btn" onclick="event.stopPropagation(); showCourseMenu(event, ${course.id})">⋯</div>
           </div>
         </div>
       </div>
@@ -3471,7 +3447,8 @@ function saveNewCourse() {
     endTime,
     studentId: student.id,
     courseName,
-    feedbacked: false
+    feedbacked: false,
+    hourlyRate: parseInt(document.getElementById('newHourlyRate').value) || 200
   });
 
   // 按时间排序
