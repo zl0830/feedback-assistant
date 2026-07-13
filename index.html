@@ -250,23 +250,6 @@
     color: var(--text-secondary);
   }
 
-  .import-tpl-btn {
-    padding: 8px 16px;
-    background: var(--primary-light);
-    color: var(--primary);
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.15s;
-    user-select: none;
-  }
-  .import-tpl-btn:active {
-    background: var(--primary);
-    color: #fff;
-  }
-
   /* 导入模板弹窗 */
   .import-tpl-overlay {
     position: fixed;
@@ -2471,14 +2454,9 @@
       </div>
       <div class="page-content">
         <div class="page-header">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div>
-              <h1>我的模板</h1>
-              <p>选择模板快速生成课后反馈</p>
-            </div>
-            <div class="import-tpl-btn" onclick="openImportTemplate()">📥 导入</div>
+            <h1>我的模板</h1>
+            <p>选择模板快速生成课后反馈</p>
           </div>
-        </div>
         <div class="template-list" id="templateList"></div>
         <div class="bottom-safe"></div>
       </div>
@@ -3615,6 +3593,36 @@ function editTemplate(id) {
   renderModuleList(tpl.modules || []);
   renderVariableList();
   navigateTo('page-edit');
+}
+
+function showTemplateFabMenu() {
+  const overlay = document.createElement('div');
+  overlay.className = 'course-menu-overlay';
+  overlay.innerHTML = `
+    <div class="course-menu-sheet" onclick="event.stopPropagation()">
+      <div class="course-menu-item" id="fabNewTpl">
+        <span class="menu-icon">📝</span>
+        <span>新建模板</span>
+      </div>
+      <div class="course-menu-item" id="fabImportTpl">
+        <span class="menu-icon">📥</span>
+        <span>导入模板</span>
+      </div>
+      <div class="course-menu-cancel" style="text-align:center;padding:14px;color:var(--text-muted);cursor:pointer;font-size:15px;">取消</div>
+    </div>
+  `;
+  overlay.onclick = () => overlay.remove();
+  document.body.appendChild(overlay);
+
+  overlay.querySelector('#fabNewTpl').onclick = () => {
+    overlay.remove();
+    createNewTemplate();
+  };
+  overlay.querySelector('#fabImportTpl').onclick = () => {
+    overlay.remove();
+    openImportTemplate();
+  };
+  overlay.querySelector('.course-menu-cancel').onclick = () => overlay.remove();
 }
 
 function createNewTemplate() {
@@ -6656,7 +6664,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   // 模板管理
-  document.getElementById('addTemplateBtn').addEventListener('click', createNewTemplate);
+  document.getElementById('addTemplateBtn').addEventListener('click', showTemplateFabMenu);
   document.getElementById('addScheduleBtn').addEventListener('click', openAddCourse);
   document.getElementById('saveTemplateBtn').addEventListener('click', saveTemplate);
   document.getElementById('templateHeader').addEventListener('input', renderVariableList);
