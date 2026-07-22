@@ -441,6 +441,13 @@
 
   .subject-tag.math { background: var(--primary-light); color: var(--primary); }
   .subject-tag.english { background: var(--purple-light); color: var(--purple); }
+  .subject-tag.chinese { background: #fef3c7; color: #d97706; }
+  .subject-tag.physics { background: #dbeafe; color: #2563eb; }
+  .subject-tag.chemistry { background: #d1fae5; color: #059669; }
+  .subject-tag.biology { background: #ccfbf1; color: #0d9488; }
+  .subject-tag.history { background: #fef3c7; color: #b45309; }
+  .subject-tag.geography { background: #dcfce7; color: #16a34a; }
+  .subject-tag.politics { background: #fce7f3; color: #db2777; }
   .subject-tag.default { background: var(--info-bg); color: var(--info); }
 
   .template-card-desc {
@@ -3178,7 +3185,7 @@ function formatDate(date, withTime = false) {
     const min = String(date.getMinutes()).padStart(2, '0');
     return `${y}-${m}-${d} ${h}:${min}`;
   }
-  return `${y}-${m}-${d} ${date.toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'})}`;
+  return `${y}-${m}-${d}`;
 }
 
 function escapeHtml(text) {
@@ -4184,9 +4191,11 @@ function renderCalendar() {
   // 上月填充
   const prevMonth = new Date(year, month, 0);
   const prevDays = prevMonth.getDate();
+  const prevM = prevMonth.getMonth() + 1;
+  const prevY = prevMonth.getFullYear();
   for (let i = startDayOfWeek - 2; i >= 0; i--) {
     const d = prevDays - i;
-    const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dateStr = `${prevY}-${String(prevM).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     grid.appendChild(createCalCell(d, dateStr, true, courseMap));
   }
   
@@ -4198,8 +4207,10 @@ function renderCalendar() {
   
   // 下月填充
   const remaining = totalCells - (startDayOfWeek - 1 + daysInMonth);
+  const nextM = month + 2 > 12 ? month + 2 - 12 : month + 2;
+  const nextY = month + 2 > 12 ? year + 1 : year;
   for (let d = 1; d <= remaining; d++) {
-    const dateStr = `${year}-${String(month + 2).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dateStr = `${nextY}-${String(nextM).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     grid.appendChild(createCalCell(d, dateStr, true, courseMap));
   }
   
@@ -6003,19 +6014,25 @@ function copyHistoryItem(id) {
 }
 
 function deleteHistoryItem(id) {
-  if (!confirm('确定要删除这条反馈记录吗？')) return;
-  try {
-    feedbackHistory = feedbackHistory.filter(h => h.id !== id);
-    saveData();
-    historySelectMode = false;
-    historySelectedIds.clear();
-    updateHistoryUI();
-    renderHistoryPage();
-    showToast('已删除');
-  } catch(e) {
-    console.error('删除失败:', e);
-    showToast('删除失败，请重试');
-  }
+  showConfirmDialog(
+    '确定要删除这条反馈记录吗？',
+    '确认删除',
+    '取消',
+    () => {
+      try {
+        feedbackHistory = feedbackHistory.filter(h => h.id !== id);
+        saveData();
+        historySelectMode = false;
+        historySelectedIds.clear();
+        updateHistoryUI();
+        renderHistoryPage();
+        showToast('已删除');
+      } catch(e) {
+        console.error('删除失败:', e);
+        showToast('删除失败，请重试');
+      }
+    }
+  );
 }
 
 // ==================== 触摸拖拽 ====================
