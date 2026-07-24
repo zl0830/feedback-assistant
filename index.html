@@ -2433,15 +2433,267 @@
   /* 桌面端打印样式 */
   @media print { body { padding: 20px; } }
 
-  /* 桌面端居中适配 */
-  @media (min-width: 500px) {
+  /* ===== 平板适配 (>=640px) ===== */
+  @media (min-width: 640px) {
     .phone-frame {
-      max-width: 430px;
+      max-width: 600px;
       margin: 0 auto;
       border-radius: 0;
+      box-shadow: 0 0 40px rgba(0,0,0,0.1);
     }
     body {
       background: #e8e9f0;
+    }
+    .page-content {
+      padding: 24px 28px;
+    }
+    .template-card {
+      padding: 22px;
+    }
+    .template-card-title {
+      font-size: 18px;
+    }
+    .template-card-desc {
+      font-size: 14px;
+    }
+    .cal-cell {
+      font-size: 14px;
+    }
+    .cal-weekdays {
+      font-size: 13px;
+    }
+    .calendar {
+      padding: 16px;
+    }
+    .sc-name {
+      font-size: 17px;
+    }
+    .sc-duration {
+      font-size: 20px;
+    }
+    .form-input, .form-select {
+      padding: 14px 18px;
+      font-size: 15px;
+    }
+    .form-textarea {
+      font-size: 15px;
+    }
+    .btn-block {
+      padding: 16px;
+      font-size: 17px;
+    }
+    .result-content {
+      padding: 28px 24px;
+      font-size: 15px;
+    }
+    .page-header h1 {
+      font-size: 26px;
+    }
+    .evaluation-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .perf-grid-compact {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .history-card {
+      padding: 20px;
+    }
+    .fab {
+      bottom: 80px;
+      right: 28px;
+      width: 56px;
+      height: 56px;
+      font-size: 28px;
+    }
+    .course-menu-sheet {
+      max-width: 600px;
+    }
+    .import-tpl-panel {
+      max-width: 600px;
+    }
+  }
+
+  /* ===== 桌面端适配 (>=900px) ===== */
+  @media (min-width: 900px) {
+    .phone-frame {
+      max-width: 860px;
+    }
+    body {
+      background: #e0e1e8;
+    }
+    .page-content {
+      padding: 28px 36px;
+    }
+
+    /* 模板列表2列 */
+    .template-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    .tpl-swipe-wrap {
+      border-radius: var(--radius-lg);
+    }
+
+    /* 日历更大 */
+    .calendar {
+      padding: 20px;
+      border-radius: var(--radius-xl);
+    }
+    .cal-cell {
+      font-size: 16px;
+      border-radius: 10px;
+    }
+    .cal-weekdays {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    .cal-grid {
+      gap: 4px;
+    }
+    .cal-cell .cal-amount {
+      font-size: 10px;
+    }
+    .cal-cell.has-unfeedbacked::after {
+      width: 7px;
+      height: 7px;
+    }
+
+    /* 课程卡片 */
+    .schedule-card {
+      border-radius: var(--radius-lg);
+    }
+    .sc-main {
+      padding: 16px 20px;
+    }
+    .sc-name {
+      font-size: 18px;
+    }
+    .sc-avatar {
+      width: 44px;
+      height: 44px;
+      font-size: 20px;
+    }
+
+    /* 表单 */
+    .form-input, .form-select {
+      padding: 15px 20px;
+      font-size: 16px;
+    }
+    .form-textarea {
+      font-size: 16px;
+      min-height: 220px;
+    }
+    .btn-block {
+      padding: 17px;
+      font-size: 17px;
+    }
+
+    /* 生成页卡片 */
+    .card {
+      padding: 22px;
+    }
+    .card-title {
+      font-size: 16px;
+    }
+
+    /* 评价网格 */
+    .evaluation-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .evaluation-item {
+      padding: 14px;
+    }
+    .evaluation-label {
+      font-size: 14px;
+    }
+
+    /* 班课表现选择器 */
+    .perf-grid-compact {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    /* 结果预览 */
+    .result-content {
+      padding: 32px 28px;
+      font-size: 16px;
+      line-height: 2;
+    }
+    .result-actions .btn {
+      padding: 17px;
+      font-size: 16px;
+    }
+
+    /* 历史记录 */
+    .history-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .history-card {
+      padding: 22px;
+    }
+
+    /* 批量操作 */
+    .batch-btn {
+      padding: 12px 0;
+      font-size: 14px;
+    }
+
+    /* 底部弹窗 */
+    .course-menu-sheet {
+      max-width: 860px;
+    }
+    .import-tpl-panel {
+      max-width: 700px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+    .import-tpl-overlay {
+      align-items: center;
+    }
+
+    /* 导航栏 */
+    .nav-bar {
+      padding: 0 24px;
+      height: 56px;
+    }
+    .nav-bar .title {
+      font-size: 18px;
+    }
+
+    /* 月导航 */
+    .month-nav-title {
+      font-size: 18px;
+      min-width: 120px;
+    }
+    .month-nav-btn {
+      width: 36px;
+      height: 36px;
+      font-size: 20px;
+    }
+  }
+
+  /* ===== 大屏桌面 (>=1200px) ===== */
+  @media (min-width: 1200px) {
+    .phone-frame {
+      max-width: 1000px;
+    }
+    .page-content {
+      padding: 32px 48px;
+    }
+    .evaluation-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .cal-cell {
+      font-size: 17px;
+    }
+    .template-list {
+      gap: 16px;
+    }
+    .course-menu-sheet {
+      max-width: 1000px;
     }
   }
 
