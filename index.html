@@ -4790,7 +4790,11 @@ function renderGeneratePage() {
   
   const stuSelect = document.getElementById('selectStudent');
   stuSelect.innerHTML = '';
+  const currentTpl = templates.find(t => t.id === currentTemplateId);
+  const tplSubject = currentTpl ? currentTpl.subject : '';
   students.forEach(s => {
+    // 按模板科目筛选学生：只显示科目匹配的学生
+    if (tplSubject && s.subject && s.subject !== tplSubject) return;
     const opt = document.createElement('option');
     opt.value = s.id;
     opt.textContent = `${s.name}（${s.courseName}）`;
@@ -5174,8 +5178,8 @@ function mockAIGenerate(brief, tpl, student, nextStepType = 'ai', selectedModule
   const evaluations = getEvaluationResults();
   const length = getSelectedLength();
 
-  // 优先用学生的科目判断，其次看简报关键词，最后用模板科目
-  let subject = (student && student.subject) ? student.subject : (tpl.subject || '');
+  // 优先用模板科目，其次用学生科目，最后从简报识别
+  let subject = tpl.subject || (student && student.subject) || '';
   const briefLower = brief.toLowerCase();
   if (!subject || subject === '通用') {
     // 从简报中识别科目
