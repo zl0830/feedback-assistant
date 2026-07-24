@@ -2494,8 +2494,9 @@
               <option value="历史">历史</option>
               <option value="地理">地理</option>
               <option value="政治">政治</option>
-              <option value="其他">其他</option>
+              <option value="__custom__">自定义</option>
             </select>
+            <input type="text" class="form-input" id="importTplSubjectCustom" placeholder="请输入自定义科目" style="display:none;margin-top:8px;">
           </div>
           <div class="form-group">
             <label class="form-label">📄 粘贴内容</label>
@@ -2631,7 +2632,9 @@
               <option value="历史">历史</option>
               <option value="地理">地理</option>
               <option value="政治">政治</option>
+              <option value="__custom__">自定义</option>
             </select>
+            <input type="text" class="form-input" id="newSubjectCustom" placeholder="请输入自定义科目" style="display:none;margin-top:8px;">
           </div>
         </div>
         <div class="form-group">
@@ -3199,6 +3202,19 @@ function escapeHtml(text) {
 }
 
 // 获取学科样式类
+function toggleCustomSubject(e) {
+  const select = e.target;
+  const customId = select.id === 'importTplSubject' ? 'importTplSubjectCustom' : 'newSubjectCustom';
+  const customInput = document.getElementById(customId);
+  if (select.value === '__custom__') {
+    customInput.style.display = 'block';
+    customInput.focus();
+  } else {
+    customInput.style.display = 'none';
+    customInput.value = '';
+  }
+}
+
 function getSubjectClass(subject) {
   if (subject === '数学') return 'math';
   if (subject === '英语') return 'english';
@@ -3212,6 +3228,14 @@ function getSubjectClass(subject) {
   return 'default';
 }
 
+function getSubjectValue(selectId, customId) {
+  const select = document.getElementById(selectId);
+  if (select.value === '__custom__') {
+    return document.getElementById(customId).value.trim() || '其他';
+  }
+  return select.value;
+}
+
 // ==================== 页面1：模板列表 ====================
 
 let importMode = 'manual';
@@ -3223,6 +3247,9 @@ function openImportTemplate() {
   document.getElementById('importTplContent').value = '';
   document.getElementById('detectedVarsGroup').style.display = 'none';
   document.getElementById('detectedVars').innerHTML = '';
+  document.getElementById('importTplSubject').value = '数学';
+  document.getElementById('importTplSubjectCustom').style.display = 'none';
+  document.getElementById('importTplSubjectCustom').value = '';
   switchImportMode('smart'); // 默认智能检测模式
   
   // 实时检测变量
@@ -3368,7 +3395,7 @@ function detectTemplateVars(text) {
 
 function doImportTemplate() {
   const name = document.getElementById('importTplName').value.trim();
-  const subject = document.getElementById('importTplSubject').value;
+  const subject = getSubjectValue('importTplSubject', 'importTplSubjectCustom');
   const content = document.getElementById('importTplContent').value.trim();
   
   if (!name) {
@@ -4458,6 +4485,17 @@ function openEditCourse(courseId) {
   setTimeout(() => {
     document.getElementById('newStudentName').value = student.name;
     document.getElementById('newSubject').value = student.subject;
+    // 处理自定义科目
+    const predefinedSubjects = ['数学', '英语', '语文', '物理', '化学', '生物', '历史', '地理', '政治'];
+    if (!predefinedSubjects.includes(student.subject)) {
+      document.getElementById('newSubject').value = '__custom__';
+      document.getElementById('newSubjectCustom').style.display = 'block';
+      document.getElementById('newSubjectCustom').value = student.subject;
+    } else {
+      document.getElementById('newSubject').value = student.subject;
+      document.getElementById('newSubjectCustom').style.display = 'none';
+      document.getElementById('newSubjectCustom').value = '';
+    }
     document.getElementById('newGrade').value = student.grade;
     document.getElementById('newDate').value = course.date;
     document.getElementById('newStartTime').value = course.startTime;
@@ -4487,7 +4525,7 @@ function openEditCourse(courseId) {
 // 保存新课程 / 编辑课程
 function saveNewCourse() {
   const name = document.getElementById('newStudentName').value.trim();
-  const subject = document.getElementById('newSubject').value;
+  const subject = getSubjectValue('newSubject', 'newSubjectCustom');
   const grade = document.getElementById('newGrade').value;
   const date = document.getElementById('newDate').value;
   const startTime = document.getElementById('newStartTime').value;
@@ -4581,6 +4619,8 @@ function saveNewCourse() {
   // 重置表单
   document.getElementById('newStudentName').value = '';
   document.getElementById('newSubject').value = '数学';
+  document.getElementById('newSubjectCustom').style.display = 'none';
+  document.getElementById('newSubjectCustom').value = '';
   document.getElementById('newGrade').value = '初一';
   document.getElementById('newDate').value = '';
   document.getElementById('newStartTime').value = '14:00';
@@ -6709,6 +6749,10 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('saveTemplateBtn').addEventListener('click', saveTemplate);
   document.getElementById('templateHeader').addEventListener('input', renderVariableList);
   document.getElementById('templateFooter').addEventListener('input', renderVariableList);
+  
+  // 自定义科目切换
+  document.getElementById('importTplSubject').addEventListener('change', toggleCustomSubject);
+  document.getElementById('newSubject').addEventListener('change', toggleCustomSubject);
   
   // 模块输入事件委托
   document.getElementById('moduleList').addEventListener('input', function(e) {
